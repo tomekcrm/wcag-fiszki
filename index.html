@@ -1,0 +1,3712 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Spójna, minimalistyczna i dostępna aplikacja fiszek i quizów WCAG 2.1 & 2.2.">
+  <meta name="theme-color" content="#09090b">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WCAG Fiszki">
+  <title>WCAG · Kryteria Sukcesu 2.1 & 2.2</title>
+  <style>
+    /* ==========================================================================
+       JEDNOLITY SYSTEM PROJEKTOWY (UNIFIED MONOCHROME DESIGN TOKENS)
+       ========================================================================== */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      
+      --bg: #09090b;
+      --surface: #121216;
+      --surface-raised: #18181f;
+      --surface-hover: #21212a;
+      
+      --border: #292933;
+      --border-subtle: #1c1c24;
+      --border-focus: #ffffff;
+      
+      --text-primary: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-tertiary: #898994;
+      
+      --radius-sm: 8px;
+      --radius: 14px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --nav-height: 64px;
+      --touch-min: 44px;
+
+      --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.25);
+      --card-shadow-hover: 0 8px 30px -4px rgba(0, 0, 0, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8f8fb;
+      --surface: #ffffff;
+      --surface-raised: #f2f2f7;
+      --surface-hover: #e8e8f0;
+      
+      --border: #e2e2ec;
+      --border-subtle: #ececf4;
+      --border-focus: #09090b;
+      
+      --text-primary: #09090b;
+      --text-secondary: #52525b;
+      --text-tertiary: #71717a;
+
+      --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+      --card-shadow-hover: 0 8px 30px -4px rgba(0, 0, 0, 0.1), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100%;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 36px);
+    }
+
+    html {
+      scroll-padding-top: 70px;
+      scroll-padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom) + 60px);
+    }
+
+    /* WCAG 2.4.7 / 2.4.11 Widoczny fokus */
+    :focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: var(--radius);
+    }
+
+    /* Odwrócenie kolorów (Invert Colors) */
+    html[data-invert="true"] {
+      filter: invert(100%) hue-rotate(180deg);
+      background-color: #09090b;
+    }
+    html[data-theme="light"][data-invert="true"] {
+      background-color: #ffffff;
+    }
+    html[data-invert="true"] :focus-visible {
+      outline: 3px solid #ffcc00 !important;
+      outline-offset: 3px !important;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -60px;
+      left: 16px;
+      background: var(--text-primary);
+      color: var(--bg);
+      padding: 8px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: var(--radius);
+      z-index: 1000;
+      text-decoration: none;
+      transition: top 0.2s ease;
+    }
+    .skip-link:focus {
+      top: 16px;
+    }
+
+    /* ==========================================================================
+       JEDNOLITE KOMPONENTY WSPÓLNE (SHARED DESIGN PRIMITIVES)
+       ========================================================================== */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .tag-badge {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      background: transparent;
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .base-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--card-shadow);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-action-primary {
+      width: 100%;
+      height: 46px;
+      background: var(--text-primary);
+      border: 1px solid var(--text-primary);
+      color: var(--bg);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    }
+    .btn-action-primary:hover {
+      opacity: 0.94;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+    .btn-action-primary:active {
+      transform: scale(0.99);
+    }
+
+    .btn-hero-start {
+      height: auto;
+      min-height: 52px;
+      padding: 10px 16px;
+      flex-direction: column;
+      gap: 3px;
+      text-align: center;
+      line-height: 1.25;
+    }
+    .btn-hero-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+    .btn-hero-sub {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      opacity: 0.82;
+    }
+
+    .btn-action-subtle {
+      height: 46px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 0 16px;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .btn-action-subtle:hover {
+      background: var(--surface-hover);
+      border-color: var(--text-secondary);
+      transform: translateY(-1px);
+    }
+    .btn-action-subtle:active {
+      transform: scale(0.99);
+    }
+
+    /* ==========================================================================
+       NAGŁÓWEK GŁÓWNY
+       ========================================================================== */
+    .app-header {
+      background-color: var(--bg);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .brand-mark {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 7px;
+      border: 1px solid var(--text-primary);
+      border-radius: var(--radius-sm);
+      letter-spacing: 0.06em;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 0;
+    }
+
+    .brand-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-ghost-icon {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+    }
+    .btn-ghost-icon:hover {
+      color: var(--text-primary);
+      border-color: var(--border);
+      background: var(--surface);
+    }
+    .btn-ghost-icon.active {
+      color: var(--text-primary);
+      border-color: var(--text-primary);
+      background: var(--surface-raised);
+    }
+    .btn-ghost-icon svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 1.75;
+    }
+
+    /* ==========================================================================
+       OBSZAR GŁÓWNY I ZAKŁADKI
+       ========================================================================== */
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 22px 18px calc(var(--nav-height) + env(safe-area-inset-bottom) + 54px);
+    }
+
+    .tab-panel {
+      display: none;
+      outline: none;
+      padding-bottom: 24px;
+    }
+    .tab-panel.active {
+      display: block;
+      animation: subtleFade 0.2s ease;
+    }
+
+    @keyframes subtleFade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       EKRAN GŁÓWNY (HOME SCREEN / DASHBOARD)
+       ========================================================================== */
+    .home-hero-card {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-raised) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 22px;
+      margin-bottom: 22px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .home-hero-card::after {
+      content: "";
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .home-hero-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      margin-top: 8px;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+    .home-hero-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .home-stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .home-stat-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 6px;
+      text-align: center;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .home-stat-num {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.1;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+    }
+    .home-stat-denom {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      margin-left: 2px;
+      letter-spacing: -0.02em;
+    }
+    .home-stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+      margin-top: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    @media (max-width: 480px) {
+      .home-stats-strip {
+        gap: 6px;
+      }
+      .home-stat-box {
+        padding: 10px 4px;
+      }
+      .home-stat-num {
+        font-size: 17px;
+      }
+      .home-stat-denom {
+        font-size: 11px;
+      }
+      .home-stat-label {
+        font-size: 9px;
+      }
+    }
+
+    /* Moduły startowe (Launchers) */
+    .home-launchers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 520px) {
+      .home-launchers-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .home-launcher-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 140px;
+      box-shadow: var(--card-shadow);
+      transition: background 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+    }
+    .home-launcher-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--text-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--card-shadow-hover);
+    }
+    .home-launcher-card:active {
+      transform: scale(0.99);
+    }
+    .home-launcher-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .home-launcher-icon {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+    .home-launcher-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    .home-launcher-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .home-launcher-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      flex: 1;
+    }
+    .home-launcher-arrow {
+      margin-top: 14px;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+
+
+    /* ==========================================================================
+       FISZKI: HUB WYBORU WARIANTU I KATEGORII
+       ========================================================================== */
+    .variant-cards-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .variant-card-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+      width: 100%;
+    }
+    .variant-card-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--text-secondary);
+    }
+    .variant-card-btn.active {
+      border-color: var(--text-primary);
+      background: var(--surface-raised);
+    }
+
+    .variant-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3px;
+    }
+
+    .variant-title-text {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .variant-desc-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Kroki wyboru Hub Fiszki */
+    .step-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .categories-scope-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Siatka konkretnych kategorii */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .categories-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .category-card-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, transform 0.08s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 84px;
+      width: 100%;
+    }
+    .category-card-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--text-secondary);
+    }
+    .category-card-btn:active {
+      transform: scale(0.99);
+    }
+
+    /* Delikatne wyróżnienie dla dwóch pierwszych kart (Wszystkie i Powtórki) */
+    .category-card-btn.featured-subtle {
+      background: var(--surface-raised);
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+    [data-theme="light"] .category-card-btn.featured-subtle {
+      background: #f1f1f5;
+      border-color: rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .category-card-btn.featured-subtle:hover {
+      background: var(--surface-hover);
+      border-color: var(--text-primary);
+    }
+
+    .category-card-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .category-card-meta {
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .category-card-desc {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    /* Pigułka kodu dla znaczników HTML w przykładach i błędach audytu */
+    .code-pill {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      padding: 1px 6px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      word-break: break-all;
+      display: inline-block;
+      vertical-align: baseline;
+    }
+
+    /* ==========================================================================
+       FISZKI: SESJA NAUKI (AKTYWNA KARTA 3D - WYDŁUŻONA W PIONIE)
+       ========================================================================== */
+    .session-navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px 12px;
+      flex-wrap: wrap;
+    }
+
+    .session-navbar-meta {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    #session-category-label {
+      white-space: normal;
+      word-break: break-word;
+      line-height: 1.25;
+      text-align: right;
+    }
+
+    @media (max-width: 480px) {
+      .session-navbar {
+        gap: 8px;
+      }
+      .session-navbar-meta {
+        max-width: calc(100% - 90px);
+      }
+      #session-category-label {
+        font-size: 10px;
+        max-width: 160px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .session-navbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .session-navbar-meta {
+        max-width: 100%;
+        justify-content: space-between;
+      }
+      #session-category-label {
+        max-width: calc(100% - 75px);
+        text-align: left;
+      }
+    }
+
+    .deck-counter-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-primary);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Wydłużona karta w pionie, aby treści nie wymagały ciągłego przewijania */
+    .flashcard-scene {
+      perspective: 1000px;
+      width: 100%;
+      min-height: 540px;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+
+    .flashcard-box {
+      width: 100%;
+      min-height: 540px;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: var(--radius);
+    }
+
+    @media (min-height: 820px) {
+      .flashcard-scene, .flashcard-box {
+        min-height: 570px;
+      }
+    }
+
+    @media (max-height: 720px) {
+      .flashcard-scene, .flashcard-box {
+        min-height: 490px;
+      }
+    }
+
+    .flashcard-box.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-face {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: var(--radius);
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .flashcard-face::-webkit-scrollbar {
+      width: 5px;
+    }
+    .flashcard-face::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .flashcard-back {
+      transform: rotateY(180deg);
+      background-color: var(--surface-raised);
+    }
+
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-center-zone {
+      text-align: center;
+      margin: auto 0;
+      padding: 14px 0;
+    }
+
+    .card-large-code {
+      font-family: var(--font-mono);
+      font-size: clamp(44px, 11vw, 64px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .card-callout-quote {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--text-primary);
+      border-radius: var(--radius);
+      padding: 14px;
+      background: var(--surface-raised);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--text-primary);
+      text-align: left;
+    }
+
+    .card-bottom-hint {
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .card-back-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 12px;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    #card-back-code {
+      white-space: normal !important;
+      word-break: break-word;
+      line-height: 1.35;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex: 1 1 auto;
+      min-width: 0;
+      max-width: calc(100% - 38px);
+      display: inline-block;
+    }
+
+    .card-back-body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .spec-block {
+      border-left: 2px solid var(--text-secondary);
+      padding: 8px 12px;
+      background: var(--surface);
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    .example-block {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface);
+    }
+
+    .deck-controls-row {
+      display: grid;
+      grid-template-columns: 48px 1fr 1fr 48px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 48px;
+      padding-bottom: 16px;
+    }
+
+    #flashcards-session {
+      padding-bottom: 40px;
+    }
+
+    /* ==========================================================================
+       WIDOK 2: QUIZ
+       ========================================================================== */
+    .quiz-card-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .hairline-bar {
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+      border-radius: 1px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .hairline-fill-bar {
+      height: 100%;
+      background: var(--text-primary);
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    .quiz-options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .quiz-option-btn {
+      min-height: 48px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .quiz-option-btn:hover:not(:disabled) {
+      border-color: var(--text-secondary);
+      background: var(--surface-hover);
+    }
+    .quiz-option-btn.is-correct {
+      border-color: var(--text-primary) !important;
+      background: var(--surface-raised) !important;
+    }
+    .quiz-option-btn.is-correct .opt-key-badge {
+      background: var(--text-primary);
+      color: var(--bg);
+      border-color: var(--text-primary);
+    }
+    .quiz-option-btn.is-wrong {
+      border-color: var(--text-tertiary) !important;
+      opacity: 0.6;
+    }
+
+    .opt-key-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .quiz-feedback-box {
+      display: none;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .quiz-feedback-box.show {
+      display: block;
+    }
+
+    /* ==========================================================================
+       WIDOK 3: KATALOG
+       ========================================================================== */
+    .catalog-search-wrap {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .catalog-search-input {
+      width: 100%;
+      height: 42px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 10px 36px 10px 12px;
+      border-radius: var(--radius);
+      font-size: 13.5px;
+      font-family: var(--font-sans);
+    }
+    .catalog-search-input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .catalog-search-clear {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      cursor: pointer;
+      display: none;
+    }
+
+    .filter-segments-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .filter-segments-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-segment-btn {
+      white-space: nowrap;
+      padding: 6px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      min-height: 32px;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+    }
+    .filter-segment-btn.active {
+      background: var(--text-primary);
+      color: var(--bg);
+      border-color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .catalog-list-wrap {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .catalog-item-row {
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .catalog-item-row:last-child {
+      border-bottom: none;
+    }
+    .catalog-item-row:hover {
+      background: var(--surface-hover);
+    }
+
+    .catalog-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .catalog-item-code {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .catalog-item-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      margin: 2px 0 4px 0;
+      color: var(--text-primary);
+    }
+
+    .catalog-item-body {
+      display: none;
+      padding-top: 10px;
+      margin-top: 10px;
+      border-top: 1px dashed var(--border);
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+    .catalog-item-row.is-open .catalog-item-body {
+      display: block;
+    }
+
+    /* ==========================================================================
+       WIDOK 4: POSTĘPY
+       ========================================================================== */
+    .metric-hero-block {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .metric-value-huge {
+      font-family: var(--font-mono);
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .stats-triplet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    .stat-tile {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 8px;
+      text-align: center;
+      background: var(--surface-raised);
+    }
+
+    .stat-tile-val {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    /* ==========================================================================
+       DOLNY DOCK NAWIGACJI
+       ========================================================================== */
+    .dock-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      background-color: var(--bg);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+      z-index: 50;
+    }
+
+    .dock-tab {
+      flex: 1;
+      height: 100%;
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.12s;
+      min-height: var(--touch-min);
+    }
+    .dock-tab svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 1.75;
+    }
+    .dock-tab[aria-selected="true"] {
+      color: var(--text-primary);
+    }
+    .dock-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: transparent;
+      margin-top: -2px;
+    }
+    .dock-tab[aria-selected="true"] .dock-dot {
+      background: var(--text-primary);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .flashcard-box, .hairline-fill-bar, .tab-panel.active {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Przejdź do treści głównej</a>
+  <div id="aria-announcer" class="sr-only" aria-live="polite" aria-atomic="true" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);"></div>
+
+  <!-- NAGŁÓWEK GŁÓWNY -->
+  <header class="app-header">
+    <a href="#" class="header-brand" id="logo-refresh" aria-label="Strona główna">
+      <span class="brand-mark">WCAG</span>
+      <div>
+        <h1 class="brand-title">Kryteria Sukcesu</h1>
+        <span class="brand-meta">Wersje 2.1 &amp; 2.2</span>
+      </div>
+    </a>
+      <button type="button" class="btn-ghost-icon" id="btn-install-pwa" aria-label="Zainstaluj aplikację na urządzeniu (PWA)" title="Zainstaluj aplikację (PWA)" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+      </button>
+      <button type="button" class="btn-ghost-icon" id="btn-invert" aria-label="Odwróć kolory (Wysoki kontrast, skrót: Alt+I)" title="Odwróć kolory (Alt+I)" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>
+        </svg>
+      </button>
+      <button type="button" class="btn-ghost-icon" id="btn-theme-toggle" aria-label="Przełącz motyw jasny/ciemny" title="Zmień motyw">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- KONTENER GŁÓWNY -->
+  <main id="main-content">
+
+    <!-- ====================================================================
+         ZAKŁADKA 0: EKRAN GŁÓWNY (HOMESCREEN)
+         ==================================================================== -->
+    <section id="panel-home" class="tab-panel active" role="tabpanel" aria-labelledby="tab-home">
+      
+      <!-- HERO KARTA -->
+      <div class="home-hero-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span class="tag-badge" style="color: var(--text-primary); border-color: currentColor;">★ WCAG 2.1 &amp; 2.2</span>
+          <span class="tag-badge">52 KRYTERIA</span>
+        </div>
+        <h2 class="home-hero-title">Centrum Nauki Dostępności Cyfrowej</h2>
+        <p class="home-hero-desc">
+          Twoje interaktywne centrum nauki normy WCAG. Opanuj kryteria sukcesu dzięki fiszkom w 3 wariantach, sprawdzaj wiedzę w quizach i trenuj audyty.
+        </p>
+
+        <!-- Szybkie statystyki postępu -->
+        <div class="home-stats-strip">
+          <div class="home-stat-box">
+            <div class="home-stat-num" id="home-stat-learned"><span class="home-stat-val">0</span><span class="home-stat-denom">/52</span></div>
+            <div class="home-stat-label">Opanowane</div>
+          </div>
+          <div class="home-stat-box">
+            <div class="home-stat-num" id="home-stat-review">0</div>
+            <div class="home-stat-label">Powtórka</div>
+          </div>
+          <div class="home-stat-box">
+            <div class="home-stat-num" id="home-stat-pct">0%</div>
+            <div class="home-stat-label">Norma</div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-action-primary btn-hero-start" id="btn-home-start-flashcards">
+          <span class="btn-hero-title">Rozpocznij Naukę Fiszek</span>
+          <span class="btn-hero-sub">Krok po kroku →</span>
+        </button>
+      </div>
+
+      <!-- KAFELKI GŁÓWNYCH MODUŁÓW -->
+      <span class="section-label">WYBIERZ MODUŁ TRENINGU</span>
+      <div class="home-launchers-grid">
+        
+        <button type="button" class="home-launcher-card" id="home-launch-flashcards">
+          <div class="home-launcher-top">
+            <div class="home-launcher-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <span class="tag-badge">3 WARIANTY</span>
+          </div>
+          <div>
+            <div class="home-launcher-title">Fiszki Aktywne</div>
+            <div class="home-launcher-desc">Trening od kodów, definicji lub realnych błędów z audytów dostępności.</div>
+          </div>
+          <div class="home-launcher-arrow">Uruchom Fiszki →</div>
+        </button>
+
+        <button type="button" class="home-launcher-card" id="home-launch-quiz">
+          <div class="home-launcher-top">
+            <div class="home-launcher-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+            </div>
+            <span class="tag-badge">SPRAWDZIAN</span>
+          </div>
+          <div>
+            <div class="home-launcher-title">Quiz Wiedzy</div>
+            <div class="home-launcher-desc">Losowe testy 5, 10 lub 20 pytań sprawdzające poziomy A, AA i zasady.</div>
+          </div>
+          <div class="home-launcher-arrow">Rozwiąż Quiz →</div>
+        </button>
+
+        <button type="button" class="home-launcher-card" id="home-launch-browse">
+          <div class="home-launcher-top">
+            <div class="home-launcher-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>
+            </div>
+            <span class="tag-badge">52 KRYTERIA</span>
+          </div>
+          <div>
+            <div class="home-launcher-title">Katalog Kryteriów</div>
+            <div class="home-launcher-desc">Baza z wyszukiwarką, filtrami, specyfikacją techniczną i kodem.</div>
+          </div>
+          <div class="home-launcher-arrow">Otwórz Katalog →</div>
+        </button>
+
+        <button type="button" class="home-launcher-card" id="home-launch-stats">
+          <div class="home-launcher-top">
+            <div class="home-launcher-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <span class="tag-badge">RAPORT</span>
+          </div>
+          <div>
+            <div class="home-launcher-title">Twoje Postępy</div>
+            <div class="home-launcher-desc">Wskaźniki opanowania dla 4 zasad POUR, nowości WCAG 2.2 i poziomu AA.</div>
+          </div>
+          <div class="home-launcher-arrow">Zobacz Raport →</div>
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- ====================================================================
+         ZAKŁADKA 1: FISZKI
+         ==================================================================== -->
+    <section id="panel-flashcards" class="tab-panel" role="tabpanel" aria-labelledby="tab-flashcards">
+      
+      <!-- SUBVIEW 1: HUB WYBORU WARIANTU I KATEGORII (MULTI-STEP) -->
+      <div id="flashcards-hub">
+        
+        <!-- KROK 1: Wybór sposobu nauki (3 warianty) -->
+        <div id="hub-step-1">
+          <span class="section-label">KROK 1 · WYBIERZ WARIANT NAUKI</span>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Wybierz format prezentacji fiszek, aby przejść do wyboru zakresu:</p>
+          <div class="variant-cards-stack" role="radiogroup" aria-label="Wariant nauki fiszek">
+            
+            <button type="button" class="variant-card-btn active" data-card-mode="code-to-desc" role="radio" aria-checked="true">
+              <div class="variant-top-row">
+                <span class="tag-badge">WARIANT 01</span>
+                <span class="tag-badge variant-dot">●</span>
+              </div>
+              <div class="variant-title-text">Kod → Opis i Wymóg</div>
+              <div class="variant-desc-text">Na awersie widzisz sam kod (np. 1.4.3). Po obrocie odkrywasz nazwę, definicję i parametry.</div>
+            </button>
+
+            <button type="button" class="variant-card-btn" data-card-mode="desc-to-code" role="radio" aria-checked="false">
+              <div class="variant-top-row">
+                <span class="tag-badge">WARIANT 02</span>
+                <span class="tag-badge variant-dot">○</span>
+              </div>
+              <div class="variant-title-text">Opis / Wymóg → Kod i Nazwa</div>
+              <div class="variant-desc-text">Na awersie czytasz oficjalny wymóg normy WCAG. Po obrocie odkrywasz numer kryterium.</div>
+            </button>
+
+            <button type="button" class="variant-card-btn" data-card-mode="error-to-code" role="radio" aria-checked="false">
+              <div class="variant-top-row">
+                <span class="tag-badge">WARIANT 03</span>
+                <span class="tag-badge variant-dot">○</span>
+              </div>
+              <div class="variant-title-text">Błąd z audytu → Naruszone Kryterium</div>
+              <div class="variant-desc-text">Na awersie widzisz realny błąd audytowy. Twoim zadaniem jest wskazać, które kryterium zostało złamane.</div>
+            </button>
+
+          </div>
+
+          <button type="button" class="btn-action-primary" id="btn-step1-next" style="margin-top: 14px;">
+            Przejdź do wyboru zakresu (Krok 2) →
+          </button>
+        </div>
+
+        <!-- KROK 2: Wybór zakresu (3 kategorie główne: Wszystkie, Powtórki, Konkretna kategoria) -->
+        <div id="hub-step-2" style="display: none;">
+          <div class="step-nav-bar">
+            <button type="button" class="btn-action-subtle" id="btn-back-step1" style="height: 34px; padding: 0 12px; font-size: 12px;">
+              ← Zmień wariant
+            </button>
+            <span class="tag-badge" id="step2-variant-badge">WARIANT 01</span>
+          </div>
+
+          <span class="section-label">KROK 2 · WYBIERZ ZAKRES FISZEK</span>
+          <div class="categories-scope-stack" id="scope-cards-grid">
+            <!-- Renderowane dynamicznie w JS: Wszystkie, Do powtórzenia (obie delikatnie wyróżnione) oraz Wybierz kategorię -->
+          </div>
+        </div>
+
+        <!-- KROK 3: Wybór konkretnej kategorii (Zasady 1-4, WCAG 2.2, Opanowane) -->
+        <div id="hub-step-3" style="display: none;">
+          <div class="step-nav-bar">
+            <button type="button" class="btn-action-subtle" id="btn-back-step2" style="height: 34px; padding: 0 12px; font-size: 12px;">
+              ← Wróć do wyboru zakresu
+            </button>
+            <span class="tag-badge">KATEGORIE</span>
+          </div>
+
+          <span class="section-label">KROK 3 · WYBIERZ ZASADĘ LUB ZESTAW</span>
+          <div class="categories-grid" id="category-cards-grid">
+            <!-- Renderowane dynamicznie w JS: 6 zestawów zasad WCAG -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SUBVIEW 2: AKTYWNA SESJA FISZEK -->
+      <div id="flashcards-session" style="display: none;">
+        
+        <div class="session-navbar">
+          <button type="button" class="btn-action-subtle" id="btn-back-hub" style="height: 36px; padding: 0 10px; flex-shrink: 0;">
+            ← Kategorie
+          </button>
+          
+          <div class="session-navbar-meta">
+            <span class="tag-badge" id="session-category-label">WSZYSTKIE</span>
+            <span class="deck-counter-badge" id="card-counter" aria-live="polite">01 / 52</span>
+          </div>
+        </div>
+
+        <!-- Scena Fiszki 3D -->
+        <div class="flashcard-scene" id="card-scene" tabindex="0" role="region" aria-label="Fiszka kryterium WCAG. Kliknij lub naciśnij spację, aby obrócić.">
+          <div class="flashcard-box" id="flashcard">
+            
+            <!-- AWERS -->
+            <div class="flashcard-face flashcard-front">
+              <div class="card-top-row">
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                  <span class="tag-badge" id="card-principle-badge">P1 · POSTRZEGALNOŚĆ</span>
+                  <span class="tag-badge" id="card-level-badge">POZIOM AA</span>
+                  <span class="tag-badge" id="card-version-badge" style="display:none;">WCAG 2.2</span>
+                </div>
+                <span class="tag-badge" id="card-status-badge">— NOWA</span>
+              </div>
+
+              <div class="card-center-zone" id="card-front-center">
+                <!-- Renderowane dynamicznie wg wariantu -->
+              </div>
+
+              <div class="card-bottom-hint">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>
+                <span>Spacja / Kliknij, aby obrócić</span>
+              </div>
+            </div>
+
+            <!-- REWERS -->
+            <div class="flashcard-face flashcard-back">
+              <div class="card-back-header">
+                <span class="tag-badge" style="color: var(--text-primary); font-weight: 700;" id="card-back-code">1.4.3</span>
+                <button type="button" class="btn-ghost-icon" id="btn-flip-back" aria-label="Obróć z powrotem" style="width: 28px; height: 28px;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+
+              <div class="card-back-body" id="card-back-scroll">
+                <!-- Renderowane dynamicznie wg wariantu -->
+              </div>
+
+              <div class="card-bottom-hint" style="margin-top: 10px;">
+                <span>Oceń znajomość (Klawisze 1, 2)</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PASEK AKCJI -->
+        <div class="deck-controls-row">
+          <button type="button" class="btn-action-subtle" id="btn-prev-card" aria-label="Poprzednia karta" title="Poprzednia karta (←)" style="padding: 0;">
+            ←
+          </button>
+
+          <button type="button" class="btn-action-subtle" id="btn-rate-again" title="Oznacz do powtórki (Klawisz 1)">
+            <span>○</span>
+            <span>Powtórz</span>
+          </button>
+
+          <button type="button" class="btn-action-primary" id="btn-rate-good" title="Oznacz jako opanowane (Klawisz 2)">
+            <span>●</span>
+            <span>Umiem</span>
+          </button>
+
+          <button type="button" class="btn-action-subtle" id="btn-next-card" aria-label="Następna karta" title="Następna karta (→)" style="padding: 0;">
+            →
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ====================================================================
+         ZAKŁADKA 2: QUIZ
+         ==================================================================== -->
+    <section id="panel-quiz" class="tab-panel" role="tabpanel" aria-labelledby="tab-quiz">
+      
+      <!-- Ekran startowy -->
+      <div id="quiz-start-screen" class="base-card">
+        <span class="section-label">TRENING WIEDZY WCAG</span>
+        <h2 style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px;">Sprawdzian kryteriów sukcesu</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 13.5px;">
+          Zweryfikuj znajomość kodów, poziomów (A/AA) oraz wymogów sukcesu w losowo wygenerowanej serii pytań.
+        </p>
+
+        <div style="margin-bottom: 22px;">
+          <span class="section-label">Liczba pytań w serii:</span>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px;">
+            <button type="button" class="filter-segment-btn active" data-qcount="5">5 pytań</button>
+            <button type="button" class="filter-segment-btn" data-qcount="10">10 pytań</button>
+            <button type="button" class="filter-segment-btn" data-qcount="20">20 pytań</button>
+          </div>
+        </div>
+
+        <button type="button" class="btn-action-primary" id="btn-start-quiz">
+          Rozpocznij Test →
+        </button>
+      </div>
+
+      <!-- Ekran pytania -->
+      <div id="quiz-active-screen" class="base-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span class="section-label" style="margin-bottom: 0;" id="quiz-question-counter">Pytanie 01 / 05</span>
+          <span class="deck-counter-badge" id="quiz-score-live">PUNKTY: 00</span>
+        </div>
+
+        <div class="hairline-bar">
+          <div class="hairline-fill-bar" id="quiz-progress-fill"></div>
+        </div>
+
+        <span class="section-label" id="quiz-question-type">DOPASUJ KOD</span>
+        <h3 style="font-size: 16.5px; font-weight: 600; line-height: 1.45; margin-bottom: 18px;" id="quiz-question-text">Pytanie...</h3>
+
+        <div class="quiz-options-list" id="quiz-options" role="radiogroup" aria-label="Opcje odpowiedzi">
+          <!-- Renderowane w JS -->
+        </div>
+
+        <div class="quiz-feedback-box" id="quiz-feedback" aria-live="polite">
+          <span class="section-label" id="quiz-feedback-title" style="margin-bottom: 4px;"></span>
+          <p id="quiz-feedback-body" style="color: var(--text-secondary);"></p>
+        </div>
+
+        <button type="button" class="btn-action-primary" id="btn-quiz-next" style="display: none;">
+          Następne pytanie →
+        </button>
+      </div>
+
+      <!-- Ekran podsumowania -->
+      <div id="quiz-result-screen" class="base-card" style="display: none; text-align: center; padding: 28px 16px;">
+        <span class="section-label">WYNIK KOŃCOWY</span>
+        <div style="font-family: var(--font-mono); font-size: 52px; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 6px;" id="result-score-circle">80%</div>
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;" id="result-title">Dobra robota</h3>
+        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 22px;" id="result-desc">Uzyskano 4 z 5 punktów.</p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button type="button" class="btn-action-primary" id="btn-quiz-restart">
+            Zagraj ponownie
+          </button>
+          <button type="button" class="btn-action-subtle" id="btn-quiz-review-cards">
+            Wróć do fiszek
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ====================================================================
+         ZAKŁADKA 3: KATALOG
+         ==================================================================== -->
+    <section id="panel-browse" class="tab-panel" role="tabpanel" aria-labelledby="tab-browse">
+      
+      <div class="catalog-search-wrap">
+        <label for="catalog-search" class="sr-only">Wyszukaj kryterium</label>
+        <input type="search" id="catalog-search" class="catalog-search-input" placeholder="Szukaj po kodzie, nazwie lub słowie (np. kontrast, fokus, 320px)..." autocomplete="off">
+        <button type="button" id="btn-clear-search" class="catalog-search-clear" aria-label="Wyczyść wyszukiwanie">&times;</button>
+      </div>
+
+      <div class="filter-segments-bar" role="group" aria-label="Filtry kryteriów">
+        <button type="button" class="filter-segment-btn active" data-filter="all">Wszystkie</button>
+        <button type="button" class="filter-segment-btn" data-filter="p1">Zasada 1</button>
+        <button type="button" class="filter-segment-btn" data-filter="p2">Zasada 2</button>
+        <button type="button" class="filter-segment-btn" data-filter="p3">Zasada 3</button>
+        <button type="button" class="filter-segment-btn" data-filter="p4">Zasada 4</button>
+        <button type="button" class="filter-segment-btn" data-filter="lvl-a">Poziom A</button>
+        <button type="button" class="filter-segment-btn" data-filter="lvl-aa">Poziom AA</button>
+        <button type="button" class="filter-segment-btn" data-filter="wcag22">WCAG 2.2</button>
+      </div>
+
+      <span class="section-label" id="catalog-count-label">52 KRYTERIA W BAZIE</span>
+
+      <div class="catalog-list-wrap" id="criteria-list">
+        <!-- Renderowane w JS -->
+      </div>
+
+    </section>
+
+    <!-- ====================================================================
+         ZAKŁADKA 4: POSTĘPY
+         ==================================================================== -->
+    <section id="panel-stats" class="tab-panel" role="tabpanel" aria-labelledby="tab-stats">
+      
+      <div class="base-card" style="margin-bottom: 14px;">
+        <span class="section-label">STOPIEŃ OPANOWANIA BAZY</span>
+        
+        <div class="metric-hero-block">
+          <div class="metric-value-huge" id="stat-overall-percent">0%</div>
+          <span class="tag-badge" id="stat-ratio-label" style="white-space: nowrap; flex-shrink: 0;">0 / 52 KRYTERIA</span>
+        </div>
+
+        <div class="hairline-bar">
+          <div class="hairline-fill-bar" id="stat-overall-fill"></div>
+        </div>
+
+        <div class="stats-triplet-grid">
+          <div class="stat-tile">
+            <div class="stat-tile-val" id="stat-count-learned">0</div>
+            <span class="section-label" style="margin-bottom: 0;">Opanowane</span>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-val" id="stat-count-review">0</div>
+            <span class="section-label" style="margin-bottom: 0;">Powtórka</span>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-val" id="stat-count-new">52</div>
+            <span class="section-label" style="margin-bottom: 0;">Nowe</span>
+          </div>
+        </div>
+
+        <span class="section-label" style="margin-top: 18px;">Postępy według 4 zasad WCAG:</span>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;" id="principles-progress-list">
+          <!-- Renderowane w JS -->
+        </div>
+      </div>
+
+      <div class="base-card">
+        <span class="section-label">HISTORIA TESTÓW QUIZ</span>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;" id="stat-quiz-summary">
+          Rozwiązane testy: 0 | Najlepszy wynik: —
+        </p>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+          <span class="section-label">PAMIĘĆ PODRĘCZNA (LOCALSTORAGE)</span>
+          <p style="font-size: 12px; color: var(--text-tertiary); margin-bottom: 10px;">
+            Wszystkie dane zapisują się lokalnie w przeglądarce.
+          </p>
+          <button type="button" class="btn-action-subtle" id="btn-reset-progress" style="height: 38px; padding: 0 12px;">
+            Resetuj postępy
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- DOLNY DOCK NAWIGACJI -->
+  <nav class="dock-nav" role="tablist" aria-label="Nawigacja główna">
+    <button type="button" class="dock-tab" role="tab" id="tab-home" aria-selected="true" aria-controls="panel-home" data-target="panel-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Start</span>
+      <span class="dock-dot" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="dock-tab" role="tab" id="tab-flashcards" aria-selected="false" aria-controls="panel-flashcards" data-target="panel-flashcards">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>Fiszki</span>
+      <span class="dock-dot" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="dock-tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="panel-quiz" data-target="panel-quiz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+      <span>Quiz</span>
+      <span class="dock-dot" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="dock-tab" role="tab" id="tab-browse" aria-selected="false" aria-controls="panel-browse" data-target="panel-browse">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z"/></svg>
+      <span>Katalog</span>
+      <span class="dock-dot" aria-hidden="true"></span>
+    </button>
+    <button type="button" class="dock-tab" role="tab" id="tab-stats" aria-selected="false" aria-controls="panel-stats" data-target="panel-stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Postępy</span>
+      <span class="dock-dot" aria-hidden="true"></span>
+    </button>
+  </nav>
+
+  <!-- SKRYPT APLIKACJI -->
+  <script>
+
+const WCAG_CRITERIA = [
+      /* --- ZASADA 1: POSTRZEGALNOŚĆ --- */
+      {
+        id: "1.1.1",
+        name: "Treść nietekstowa",
+        nameEn: "Non-text Content",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Każda treść nietekstowa (zdjęcia, ikony, wykresy, CAPTCHA) musi posiadać tekstową alternatywę przekazującą to samo znaczenie.",
+        details: "Obrazy informacyjne wymagają zwięzłego opisu w atrybucie alt. Grafiki dekoracyjne muszą mieć pusty atrybut alt=\"\" lub role=\"presentation\".",
+        examples: "✓ Dobrze: <code class=\"code-pill\">&lt;img src=\"koszyk.png\" alt=\"Twój koszyk zakupowy\"&gt;</code> | ✕ Błąd: <code class=\"code-pill\">&lt;img src=\"wykres.png\" alt=\"obrazek\"&gt;</code>.",
+        auditError: "Ikona lupy w polu wyszukiwarki to tag <code class=\"code-pill\">&lt;img src='search.png'&gt;</code> bez atrybutu alt, przez co czytnik ekranu odczytuje nazwę pliku 'search.png'.",
+        tags: ["obraz", "alt", "grafika", "ikona", "captcha"]
+      },
+      {
+        id: "1.2.1",
+        name: "Tylko audio lub tylko wideo (nagrane)",
+        nameEn: "Audio-only and Video-only (Prerecorded)",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Dla nagranych materiałów zawierających wyłącznie dźwięk (np. podcast) lub wyłącznie obraz bez dźwięku zapewnia się alternatywę tekstową lub ścieżkę dźwiękową.",
+        details: "Dla audio-only: transkrypcja pełna zawierająca dialogi i dźwięki otoczenia. Dla video-only: transkrypcja lub zsynchronizowana ścieżka lektorska.",
+        examples: "Podcast udostępniony wraz z pełną transkrypcją tekstową pod odtwarzaczem.",
+        auditError: "Na stronie zamieszczono nagranie podcastu z wywiadem bez żadnej transkrypcji tekstowej dla osób niesłyszących.",
+        tags: ["multimedia", "audio", "wideo", "transkrypcja", "podcast"]
+      },
+      {
+        id: "1.2.2",
+        name: "Napisy rozszerzone (nagrane)",
+        nameEn: "Captions (Prerecorded)",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Zapewnienie zsynchronizowanych napisów dla niesłyszących (closed captions) do nagranych materiałów wideo z dźwiękiem.",
+        details: "Napisy muszą obejmować dialogi, identyfikację osób mówiących oraz kluczowe efekty dźwiękowe (np. [muzyka dramatyczna], [dzwonek do drzwi]).",
+        examples: "Plik .vtt podpięty pod tag <video> z elementem <track kind=\"captions\">.",
+        auditError: "Film wideo instruktażowy nie ma zsynchronizowanych napisów rozszerzonych (CC) – brak tekstu dialogów i kluczowych dźwięków.",
+        tags: ["napisy", "wideo", "niesłyszący", "captions", "multimedia"]
+      },
+      {
+        id: "1.2.3",
+        name: "Audiodeskrypcja lub transkrypcja pełna (nagrana)",
+        nameEn: "Audio Description or Media Alternative (Prerecorded)",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Dla nagranego wideo z dźwiękiem udostępnia się audiodeskrypcję kluczowych treści wizualnych LUB pełną transkrypcję tekstową.",
+        details: "Na poziomie A dopuszczalny jest wybór między audiodeskrypcją a transkrypcją opisującą akcję i dialogi.",
+        examples: "Dokument tekstowy opisujący sceny filmu, napisy ekranowe oraz wypowiedzi bohaterów.",
+        auditError: "W nagraniu wideo kluczowa akcja dzieje się bez słów, a serwis nie udostępnił ani audiodeskrypcji, ani transkrypcji opisowej.",
+        tags: ["audiodeskrypcja", "transkrypcja", "wideo", "film"]
+      },
+      {
+        id: "1.2.5",
+        name: "Audiodeskrypcja (nagrana)",
+        nameEn: "Audio Description (Prerecorded)",
+        principle: 1,
+        level: "AA",
+        version: "2.0",
+        summary: "Dla nagranego wideo z dźwiękiem obowiązkowa jest zsynchronizowana ścieżka lektorska z audiodeskrypcją (sama transkrypcja na poziomie AA już nie wystarcza).",
+        details: "Lektor opisuje w naturalnych przerwach między dialogami to, co dzieje się na ekranie (ruchy postaci, mimikę, plansze z napisami).",
+        examples: "Druga ścieżka dźwiękowa w odtwarzaczu z narratorem audiodeskrypcji.",
+        auditError: "W materiale wideo na poziomie AA brak audiodeskrypcji – lektor nie opisuje plansz z napisami i istotnych akcji wizualnych.",
+        tags: ["audiodeskrypcja", "wideo", "film", "lektor", "niewidomi"]
+      },
+      {
+        id: "1.3.1",
+        name: "Informacje i relacje",
+        nameEn: "Info and Relationships",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Wszystkie informacje, struktury i relacje prezentowane wizualnie muszą być dostępne programowo w kodzie dla technologii wspomagających.",
+        details: "Stosowanie właściwych znaczników HTML: nagłówki <h1>-<h6>, listy <ul>/<ol>, tabele z <th> i zakresem scope, powiązania <label for=\"id\">.",
+        examples: "Niedopuszczalne jest imitowanie nagłówka przez <p class=\"big-bold\"> zamiast <h2>.",
+        auditError: "Nagłówek sekcji wykonano jako <div class='big-bold'> zamiast semantycznego znacznika <h2>, a tabelę danych bez nagłówków <th>.",
+        tags: ["struktura", "nagłówki", "tabele", "formularze", "semantyka"]
+      },
+      {
+        id: "1.3.2",
+        name: "Zrozumiała kolejność",
+        nameEn: "Meaningful Sequence",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Gdy kolejność treści wpływa na jej znaczenie, kolejność w kodzie DOM musi logicznie odzwierciedlać kolejność odczytu.",
+        details: "Kolejność czytania przez czytnik ekranu wynika z kolejności w HTML, a nie z wizualnego pozycjonowania przez CSS (np. flex order lub float).",
+        examples: "Wielokolumnowy układ artykułu musi czytać się kolumna po kolumnie, a nie przeskakiwać między wierszami różnych artykułów.",
+        auditError: "Układ kolumn w CSS (flex-direction: row-reverse) sprawia, że czytnik ekranu odczytuje treść w odwrotnej, nielogicznej kolejności.",
+        tags: ["kolejność", "dom", "czytnik", "struktura"]
+      },
+      {
+        id: "1.3.3",
+        name: "Właściwości zmysłowe",
+        nameEn: "Sensory Characteristics",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Instrukcje nie mogą polegać wyłącznie na cechach zmysłowych, takich jak kształt, rozmiar, orientacja czy położenie wizualne.",
+        details: "Unikaj zwrotów typu: 'Kliknij okrągły przycisk po prawej stronie' albo 'Pozycje w kolorze czerwonym są błędne'.",
+        examples: "✓ Dobrze: 'Kliknij przycisk Dalej znajdujący się po prawej stronie' (podano nazwę i położenie).",
+        auditError: "Instrukcja w formularzu brzmi: 'Kliknij okrągły przycisk po prawej stronie, aby zatwierdzić' (oparcie wyłącznie na kształcie i pozycji).",
+        tags: ["zmysły", "kształt", "położenie", "instrukcje"]
+      },
+      {
+        id: "1.3.4",
+        name: "Orientacja",
+        nameEn: "Orientation",
+        principle: 1,
+        level: "AA",
+        version: "2.1",
+        summary: "Zawartość i funkcje strony nie mogą blokować się na jednej orientacji ekranu (pionowej lub poziomej), chyba że jest to bezwzględnie konieczne.",
+        details: "Użytkownicy wózków inwalidzkich często mają tablet zamocowany na stałe w pozycji poziomej. Aplikacja musi działać w obu widokach.",
+        examples: "Wyjątek: aplikacja pianina wymagająca szerokiej klawiatury lub czek bankowy.",
+        auditError: "Aplikacja na tablecie wymusza orientację pionową i blokuje obrót do poziomu, uniemożliwiając obsługę na wózku inwalidzkim.",
+        tags: ["orientacja", "mobilne", "obrót", "pion", "poziom"]
+      },
+      {
+        id: "1.3.5",
+        name: "Identyfikacja przeznaczenia pól",
+        nameEn: "Identify Input Purpose",
+        principle: 1,
+        level: "AA",
+        version: "2.1",
+        summary: "Pola formularza pobierające dane osobowe użytkownika muszą mieć określony atrybut autocomplete.",
+        details: "Ułatwia to osobom z niepełnosprawnościami poznawczymi automatyczne wypełnianie formularzy (np. autocomplete=\"name\", \"email\", \"tel\").",
+        examples: "<input type=\"email\" autocomplete=\"email\" id=\"mail\">",
+        auditError: "Pole adresu e-mail w formularzu zamówienia nie posiada atrybutu autocomplete='email', utrudniając autouzupełnianie.",
+        tags: ["autocomplete", "formularz", "dane", "autouzupełnianie"]
+      },
+      {
+        id: "1.4.1",
+        name: "Użycie koloru",
+        nameEn: "Use of Color",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Kolor nie może być jedynym wizualnym środkiem przekazywania informacji, sygnalizowania błędu lub wyróżniania elementów.",
+        details: "Osoby ze ślepotą barw nie zauważą różnicy między czerwonym a zielonym. Obok koloru dodaj ikonę, tekst lub podkreślenie.",
+        examples: "Błąd w formularzu zaznaczony czerwoną ramką oraz ikoną wykrzyknika i komunikatem tekstowym.",
+        auditError: "Błędy w formularzu oznaczono wyłącznie czerwoną ramką – brak ikony ostrzegawczej oraz brak komunikatu tekstowego pod polem.",
+        tags: ["kolor", "daltonizm", "kontrast", "błąd"]
+      },
+      {
+        id: "1.4.2",
+        name: "Kontrola dźwięku",
+        nameEn: "Audio Control",
+        principle: 1,
+        level: "A",
+        version: "2.0",
+        summary: "Jeśli jakikolwiek dźwięk włącza się automatycznie i trwa dłużej niż 3 sekundy, musi istnieć natychmiastowy mechanizm jego wyciszenia lub pauzy.",
+        details: "Niezależna regulacja głośności lub łatwy do znalezienia przycisk 'Wycisz' na początku strony.",
+        examples: "Automatycznie odtwarzany film w tle z domyślnie wyciszonym dźwiękiem (muted).",
+        auditError: "Po wejściu na stronę automatycznie włącza się muzyka w tle trwająca 20 sekund, bez łatwo dostępnego przycisku wyciszenia.",
+        tags: ["audio", "dźwięk", "głośność", "autoplay"]
+      },
+      {
+        id: "1.4.3",
+        name: "Kontrast (minimalny)",
+        nameEn: "Contrast (Minimum)",
+        principle: 1,
+        level: "AA",
+        version: "2.0",
+        summary: "Tekst i tekst w postaci grafiki musi mieć współczynnik kontrastu min. 4.5:1 względem tła (lub 3:1 dla dużego tekstu).",
+        details: "Duży tekst to co najmniej 18pt (24px) lub 14pt (18.5px) w wariancie pogrubionym (bold). Logotypy są wyłączone z tego wymogu.",
+        examples: "Jasnoszary tekst #999 na białym tle ma kontrast ~2.8:1 (BŁĄD). Ciemnoszary #595959 na białym ma 4.54:1 (OK).",
+        auditError: "Tekst w stopce ma kolor jasnoszary #999999 na białym tle #ffffff (kontrast wynosi 2.8:1 zamiast wymaganych 4.5:1).",
+        tags: ["kontrast", "kolor", "tekst", "4.5:1", "3:1"]
+      },
+      {
+        id: "1.4.4",
+        name: "Zmiana rozmiaru tekstu",
+        nameEn: "Resize Text",
+        principle: 1,
+        level: "AA",
+        version: "2.0",
+        summary: "Tekst można powiększyć do 200% bez użycia technologii wspomagających i bez utraty zawartości lub funkcjonalności strony.",
+        details: "Unikaj sztywnych wysokości kontenerów (np. height: 30px) z overflow: hidden, które ucinają powiększony tekst.",
+        examples: "Stosowanie jednostek relatywnych (rem, em) i elastycznych kontenerów flexbox/grid.",
+        auditError: "Po powiększeniu czcionki w przeglądarce do 200% tekst w menu nachodzi na siebie i ucina się z powodu stałej wysokości container { height: 35px; }.",
+        tags: ["zoom", "powiększenie", "200%", "tekst", "skalowanie"]
+      },
+      {
+        id: "1.4.5",
+        name: "Tekst w postaci grafiki",
+        nameEn: "Images of Text",
+        principle: 1,
+        level: "AA",
+        version: "2.0",
+        summary: "Należy stosować prawdziwy tekst w kodzie zamiast obrazów zawierających tekst, chyba że konkretny krój pisma jest niezbędny.",
+        details: "Prawdziwy tekst dopasowuje się do ustawień użytkownika (kontrast, powiększenie, czytnik ekranu). Wyjątek: logo firmy.",
+        examples: "Zastąpienie graficznego przycisku 'Kup teraz' przyciskiem HTML/CSS.",
+        auditError: "Przycisk 'Kup bilet' to obrazek PNG z napisem zamiast tekstu ostylowanego w CSS, przez co nie reaguje na powiększenie i zmianę kontrastu.",
+        tags: ["tekst", "grafika", "obraz", "typografia"]
+      },
+      {
+        id: "1.4.10",
+        name: "Dopasowanie do szerokości (Reflow)",
+        nameEn: "Reflow",
+        principle: 1,
+        level: "AA",
+        version: "2.1",
+        summary: "Treść można przeglądać bez konieczności przewijania w dwóch wymiarach przy szerokości 320px CSS (odpowiednik 400% zoomu przy 1280px).",
+        details: "Zapobiega konieczności poziomego scrollowania na telefonach i przy dużym powiększeniu. Wyjątek: tabele danych, wykresy, mapy.",
+        examples: "Responsywny design bez sztywnych szerokości w pikselach typu width: 800px.",
+        auditError: "Przy szerokości ekranu 320px pojawia się poziomy pasek przewijania, bo baner na stronie głównej ma stałą szerokość width: 750px.",
+        tags: ["reflow", "320px", "zoom", "400%", "mobilne", "scroll"]
+      },
+      {
+        id: "1.4.11",
+        name: "Kontrast elementów nietekstowych",
+        nameEn: "Non-text Contrast",
+        principle: 1,
+        level: "AA",
+        version: "2.1",
+        summary: "Elementy interfejsu (ramki pól, przyciski, wskaźniki fokusu) oraz grafiki niosące treść (ikony, wykresy) muszą mieć kontrast min. 3:1.",
+        details: "Kontrast mierzy się względem sąsiadujących barw tła. Bardzo jasnoszara ramka inputa na białym tle to częsty błąd!",
+        examples: "Pole formularza z obramowaniem o kontraście co najmniej 3:1 wobec tła formularza.",
+        auditError: "Pola formularza posiadają bardzo jasnoszare obramowanie #e5e5e5 na białym tle (kontrast ramki 1.25:1 zamiast wymaganych 3:1).",
+        tags: ["kontrast", "ikony", "ramki", "input", "fokus", "3:1"]
+      },
+      {
+        id: "1.4.12",
+        name: "Odstępy w tekście",
+        nameEn: "Text Spacing",
+        principle: 1,
+        level: "AA",
+        version: "2.1",
+        summary: "Brak utraty treści przy powiększeniu przez użytkownika odstępów: wysokość linii 1.5x, akapity 2x, litery 0.12x, słowa 0.16x.",
+        details: "Strona nie może obcinać ani nakładać na siebie tekstu, gdy użytkownik wymusi luźniejszy układ stylami w przeglądarce.",
+        examples: "Unikanie stałych wysokości kart i kontenerów tekstowych.",
+        auditError: "Po wymuszeniu w przeglądarce większych odstępów (line-height: 1.5, letter-spacing: 0.12em) napisy w kartach produktów obcinają się.",
+        tags: ["odstępy", "interlinia", "spacing", "tekst"]
+      },
+      {
+        id: "1.4.13",
+        name: "Treść spod kursora lub po najechaniu",
+        nameEn: "Content on Hover or Focus",
+        principle: 1,
+        level: "AA",
+        version: "2.1",
+        summary: "Dodatkowa treść pojawiająca się po najechaniu myszą lub fokusie (tooltips, submenu) musi być możliwa do odrzucenia, najechania i trwała.",
+        details: "1. Możliwa do ukrycia bez ruszania kursora (np. klawisz Esc). 2. Kursor można przesunąć na dymek bez jego zniknięcia. 3. Nie znika sama z siebie po czasie.",
+        examples: "Podpowiedź (tooltip), na którą można najechać kursorem, aby zaznaczyć w niej tekst.",
+        auditError: "Dymek z podpowiedzią (tooltip) po najechaniu kursorem znika w ułamku sekundy, gdy użytkownik próbuje na niego najechać, by skopiować treść.",
+        tags: ["hover", "focus", "tooltip", "dymek", "menu"]
+      },
+
+      /* --- ZASADA 2: FUNKCJONALNOŚĆ --- */
+      {
+        id: "2.1.1",
+        name: "Klawiatura",
+        nameEn: "Keyboard",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Wszystkie funkcjonalności serwisu muszą być dostępne za pomocą samej klawiatury bez konieczności używania myszy.",
+        details: "Nie wolno wymagać określonego tempa uderzeń klawiszy. Każdy przycisk, link, rozwijane menu i modal musi działać z klawiatury.",
+        examples: "Obsługa elementów za pomocą klawiszy Tab, Shift+Tab, Enter, Spacja i strzałek.",
+        auditError: "Rozwijane menu w nawigacji głównej otwiera się tylko po najechaniu myszą – nawigacja klawiszem Tab całkowicie je omija.",
+        tags: ["klawiatura", "dostępność", "tab", "nawigacja"]
+      },
+      {
+        id: "2.1.2",
+        name: "Brak pułapki na klawiaturę",
+        nameEn: "No Keyboard Trap",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Fokus klawiatury nie może ulec uwięzieniu w żadnym elemencie – użytkownik musi mieć możliwość wyjścia standardowymi klawiszami.",
+        details: "Typowy błąd: modal, z którego nie da się wyjść klawiszem Tab lub Escape, albo odtwarzacz wideo przejmujący kontrolę.",
+        examples: "Prawidłowo zaimplementowany Focus Trap w oknie modalnym zamykany klawiszem Escape.",
+        auditError: "Po wejściu klawiszem Tab do widżetu kalendarza nie można z niego wyjść za pomocą Tab ani Escape (pułapka na klawiaturę).",
+        tags: ["pułapka", "modal", "fokus", "klawiatura", "escape"]
+      },
+      {
+        id: "2.1.4",
+        name: "Klawisze skrótu znakowego",
+        nameEn: "Character Key Shortcuts",
+        principle: 2,
+        level: "A",
+        version: "2.1",
+        summary: "Jednoznakowe skróty klawiszowe (np. klawisz 'M' do wyciszenia) można wyłączyć, zmienić lub działają tylko przy aktywnym komponencie.",
+        details: "Chroni osoby korzystające ze sterowania głosem, które przy dyktowaniu słów mogłyby przypadkowo wywoływać skróty klawiszowe.",
+        examples: "Ustawienia aplikacji umożliwiające wyłączenie jednoliterowych skrótów.",
+        auditError: "W aplikacji internetowej jednoliterowy klawisz 's' powoduje wysłanie wiadomości, uniemożliwiając dyktowanie osobom sterującym głosem.",
+        tags: ["skróty", "pojedynczy klawisz", "sterowanie głosem"]
+      },
+      {
+        id: "2.2.1",
+        name: "Dostosowanie czasu",
+        nameEn: "Timing Adjustable",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Użytkownik ma możliwość wyłączenia, dostosowania lub co najmniej 10-krotnego przedłużenia limitu czasu sesji.",
+        details: "Osoby z niepełnosprawnościami potrzebują więcej czasu na przeczytanie i wypełnienie formularzy. Komunikat ostrzegawczy z opcją przedłużenia.",
+        examples: "Wyskakujące okienko: 'Twoja sesja wygaśnie za 2 minuty. Kliknij Spację, aby przedłużyć'.",
+        auditError: "Formularz bankowy wylogowuje użytkownika po 5 minutach bez żadnego ostrzeżenia i bez opcji przedłużenia limitu czasu.",
+        tags: ["czas", "sesja", "timeout", "przedłużenie"]
+      },
+      {
+        id: "2.2.2",
+        name: "Pauza, zatrzymanie, ukrycie",
+        nameEn: "Pause, Stop, Hide",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Ruchome, migające lub automatycznie przewijające się treści (animacje > 5s, karuzele, paski informacyjne) można zatrzymać.",
+        details: "Użytkownik musi mieć widoczny przycisk Pauza/Stop. Ruchome elementy dekoncentrują osoby z ADHD i zaburzeniami poznawczymi.",
+        examples: "Przycisk 'Pauza' na automatycznie przewijającym się sliderze zdjęć.",
+        auditError: "Karuzela z promocjami na stronie głównej przewija się automatycznie bez możliwości zatrzymania lub zapauzowania.",
+        tags: ["karuzela", "slider", "animacja", "pauza", "stop"]
+      },
+      {
+        id: "2.3.1",
+        name: "Trzy błyski lub wartości poniżej progu",
+        nameEn: "Three Flashes or Below Threshold",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Żaden element strony nie może błyskać częściej niż 3 razy w ciągu sekundy, aby zapobiec atakom padaczki fotogennej.",
+        details: "Dotyczy to zarówno filmów wideo, jak i animacji CSS czy banerów reklamowych.",
+        examples: "Unikanie stroboskopowych efektów świetlnych w materiałach promocyjnych.",
+        auditError: "Baner promocyjny zawiera jaskrawą animację błyskającą 4 razy na sekundę, stwarzając ryzyko ataku padaczki fotogennej.",
+        tags: ["błyski", "padaczka", "bezpieczeństwo", "animacje"]
+      },
+      {
+        id: "2.4.1",
+        name: "Pominięcie bloków",
+        nameEn: "Bypass Blocks",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Zapewnienie mechanizmu umożliwiającego pominięcie powtarzających się bloków treści (np. nagłówka i menu) i przejście do treści głównej.",
+        details: "Najpopularniejsze rozwiązanie to tzw. skip-link umieszczony na samym początku kodu HTML, widoczny po naciśnięciu klawisza Tab.",
+        examples: "<a href=\"#main\" class=\"skip-link\">Przejdź do treści głównej</a>",
+        auditError: "Brak łącza skip-link ('Przejdź do treści') – użytkownik klawiatury musi za każdym razem przejść przez 50 linków w nagłówku.",
+        tags: ["skip-link", "nawigacja", "bloki", "klawiatura"]
+      },
+      {
+        id: "2.4.2",
+        name: "Tytuł strony",
+        nameEn: "Page Titled",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Każda strona internetowa ma unikalny, zwięzły i opisowy tytuł w elemencie <title> określający jej cel i zawartość.",
+        details: "Tytuł to pierwsza rzecz odczytywana przez czytnik ekranu po wejściu na stronę. Format: [Nazwa podstrony] – [Nazwa serwisu].",
+        examples: "<title>Koszyk zakupowy – Sklep Internetowy</title>",
+        auditError: "Każda podstrona w serwisie posiada identyczny znacznik <title>Serwis internetowy</title> bez wskazania nazwy podstrony.",
+        tags: ["title", "tytuł", "karta", "nagłówek"]
+      },
+      {
+        id: "2.4.3",
+        name: "Kolejność fokusa",
+        nameEn: "Focus Order",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Gdy nawigacja odbywa się sekwencyjnie (klawiszem Tab), elementy interaktywne otrzymują fokus w logicznej, przewidywalnej kolejności.",
+        details: "Kolejność fokusu musi odpowiadać sensowi treści (najczęściej od lewej do prawej, od góry do dołu). Unikaj tabindex > 0!",
+        examples: "Nawigacja przez pola formularza nie przeskakuje chaotycznie między kolumnami.",
+        auditError: "Kolejność tabowania po formularzu skacze chaotycznie z lewej kolumny do stopki, a potem do prawej kolumny przez błędny tabindex.",
+        tags: ["fokus", "tab", "kolejność", "tabindex"]
+      },
+      {
+        id: "2.4.4",
+        name: "Cel linku (w kontekście)",
+        nameEn: "Link Purpose (In Context)",
+        principle: 2,
+        level: "A",
+        version: "2.0",
+        summary: "Cel każdego łącza można określić z samego tekstu linku lub z tekstu łącza powiązanego z jego bezpośrednim kontekstem.",
+        details: "Unikaj ogólnych tekstów linków typu 'kliknij tutaj', 'więcej', 'czytaj dalej' bez kontekstu nagłówka.",
+        examples: "✓ Dobrze: 'Pobierz raport dostępności (PDF, 2MB)' | ✕ Błąd: 'Kliknij tutaj'.",
+        auditError: "Na liście wiadomości znajduje się 15 odnośników o treści 'Więcej...' bez żadnego dodatkowego kontekstu w tekście lub nagłówku.",
+        tags: ["link", "odnośnik", "cel", "treść"]
+      },
+      {
+        id: "2.4.6",
+        name: "Nagłówki i etykiety",
+        nameEn: "Headings and Labels",
+        principle: 2,
+        level: "AA",
+        version: "2.0",
+        summary: "Nagłówki muszą opisywać temat lub cel sekcji, a etykiety formularzy muszą jednoznacznie wskazywać przeznaczenie pól.",
+        details: "Etykiety nie mogą być puste, mylące ani zastępowane wyłącznie znikającym atrybutem placeholder.",
+        examples: "Widoczna etykieta <label for=\"pesel\">Numer PESEL</label> przy polu wejściowym.",
+        auditError: "Pole formularza ma niejednoznaczną etykietę 'Dane' zamiast precyzyjnego opisu 'Adres doręczenia korespondencji'.",
+        tags: ["nagłówki", "etykiety", "label", "formularz"]
+      },
+      {
+        id: "2.4.7",
+        name: "Widoczny fokus",
+        nameEn: "Focus Visible",
+        principle: 2,
+        level: "AA",
+        version: "2.0",
+        summary: "Każdy element interaktywny otrzymujący fokus z klawiatury musi posiadać wyraźny i widoczny wskaźnik fokusu.",
+        details: "Kategoryczny zakaz stosowania reguły CSS `outline: none;` bez zdefiniowania własnego, wyraźnego zamiennika!",
+        examples: ":focus-visible { outline: 3px solid #0284c7; outline-offset: 2px; }",
+        auditError: "W arkuszu CSS usunięto wskaźnik fokusu regułą *:focus { outline: none; }, przez co użytkownik nie wie, który element jest aktywny.",
+        tags: ["fokus", "outline", "klawiatura", "widoczność"]
+      },
+      {
+        id: "2.4.11",
+        name: "Niezasłonięty fokus (minimum)",
+        nameEn: "Focus Not Obscured (Minimum)",
+        principle: 2,
+        level: "AA",
+        version: "2.2",
+        summary: "NOWOŚĆ WCAG 2.2! Gdy element otrzymuje fokus klawiatury, nie może być całkowicie zasłonięty przez treści pływające autora.",
+        details: "Dotyczy przyklejonych nagłówków (sticky headers), banerów cookie i pływających okienek czatu zasłaniających aktywne pola formularza.",
+        examples: "Zastosowanie CSS `scroll-padding-top` tak, by sticky header nie zasłaniał elementu pod nim.",
+        auditError: "Przyklejone na dole okienko zgody na pliki cookies (cookie banner) całkowicie zasłania aktywne pole formularza i przycisk 'Zapisz'.",
+        tags: ["wcag22", "nowość", "fokus", "sticky", "zasłanianie"]
+      },
+      {
+        id: "2.5.1",
+        name: "Gesty wskaźnika",
+        nameEn: "Pointer Gestures",
+        principle: 2,
+        level: "A",
+        version: "2.1",
+        summary: "Wszystkie funkcje obsługiwane za pomocą gestów wielodotykowych (np. uszczypnięcie/pinch-to-zoom) lub ścieżkowych muszą mieć prostą alternatywę jednopunktową.",
+        details: "Osoby korzystające z rysika w ustach lub ze spastycznością dłoni nie wykonają gestu swipe ani rozsuwania dwóch palców.",
+        examples: "Mapa obsługiwana gestem uszczypnięcia posiada dodatkowo przyciski [+] i [-] do powiększania.",
+        auditError: "Powiększanie mapy dojazdu wymaga wykonania gestu dwoma palcami (uszczypnięcie) – brak alternatywnych przycisków [+] i [-].",
+        tags: ["gesty", "dotyk", "pinch", "swipe", "mobilne"]
+      },
+      {
+        id: "2.5.2",
+        name: "Anulowanie operacji wskaźnika",
+        nameEn: "Pointer Cancellation",
+        principle: 2,
+        level: "A",
+        version: "2.1",
+        summary: "Dla kliknięć/dotknięć akcja nie powinna uruchamiać się przy zdarzeniu wciśnięcia (down-event), lecz dopiero po zwolnieniu (up-event) z możliwością anulowania.",
+        details: "Użytkownik może zrezygnować z kliknięcia, odsuwając palec/kursor poza obszar przycisku przed jego puszczeniem.",
+        examples: "Standardowe zdarzenie click w przeglądarce spełnia to kryterium automatycznie.",
+        auditError: "Przycisk 'Usuń dane' wykonuje akcję natychmiast przy wciśnięciu palca (mousedown/touchstart) bez możliwości cofnięcia przez odsunięcie palca.",
+        tags: ["kliknięcie", "dotyk", "anulowanie", "pointer"]
+      },
+      {
+        id: "2.5.3",
+        name: "Etykieta w nazwie",
+        nameEn: "Label in Name",
+        principle: 2,
+        level: "A",
+        version: "2.1",
+        summary: "Dla elementów z widoczną etykietą tekstową, dostępna nazwa programowa (np. aria-label) musi zawierać ten sam tekst.",
+        details: "Osoba korzystająca ze sterowania głosem mówi 'Kliknij Szukaj'. Jeśli przycisk ma aria-label=\"Znajdź w bazie\", komenda głosowa nie zadziała!",
+        examples: "✓ Dobrze: <button aria-label=\"Szukaj w serwisie\">Szukaj</button>.",
+        auditError: "Widoczny przycisk ma napis 'Szukaj', ale w kodzie przypisano mu aria-label='Przejdź do strefy klienta', co blokuje sterowanie głosem.",
+        tags: ["aria-label", "etykieta", "sterowanie głosem", "nazwa"]
+      },
+      {
+        id: "2.5.7",
+        name: "Ruchy przeciągania",
+        nameEn: "Dragging Movements",
+        principle: 2,
+        level: "AA",
+        version: "2.2",
+        summary: "NOWOŚĆ WCAG 2.2! Funkcje oparte na przeciąganiu (drag-and-drop, suwaki, sortowanie elementów) muszą posiadać prostą alternatywę klikalną.",
+        details: "Przeciąganie wymaga precyzji ruchowej. Zapewnij przyciski 'W górę / W dół' lub listę rozwijaną do zmiany kolejności.",
+        examples: "Tablica Kanban z opcją przenoszenia kart za pomocą menu przycisku oprócz drag-and-drop.",
+        auditError: "Sortowanie listy zadań na tablicy Kanban możliwe jest wyłącznie metodą przeciągnij i upuść (drag and drop) – brak przycisków góra/dół.",
+        tags: ["wcag22", "nowość", "przeciąganie", "drag-and-drop", "sortowanie"]
+      },
+      {
+        id: "2.5.8",
+        name: "Minimalny rozmiar celu dotyku",
+        nameEn: "Target Size (Minimum)",
+        principle: 2,
+        level: "AA",
+        version: "2.2",
+        summary: "NOWOŚĆ WCAG 2.2! Cel wskaźnika (np. przycisk, ikona) musi mieć wymiar co najmniej 24x24 piksele CSS lub odpowiedni odstęp wokół.",
+        details: "Zapobiega przypadkowemu kliknięciu sąsiednich małych przycisków na ekranie dotykowym. Wyjątek: linki wewnątrz ciągłego tekstu.",
+        examples: "Ikony akcji o wymiarach 24x24px lub mniejsze otoczone marginesem dającym łącznie strefę 24px.",
+        auditError: "Przyciski usuwania wiersza w tabeli to miniaturowe krzyżyki 12x12px umieszczone bezpośrednio obok siebie bez 24px strefy dotyku.",
+        tags: ["wcag22", "nowość", "rozmiar", "cel", "24px", "dotyk", "mobilne"]
+      },
+
+      /* --- ZASADA 3: ZROZUMIAŁOŚĆ --- */
+      {
+        id: "3.1.1",
+        name: "Język strony",
+        nameEn: "Language of Page",
+        principle: 3,
+        level: "A",
+        version: "2.0",
+        summary: "Domyślny język dokumentu strony musi być określony programowo za pomocą atrybutu lang w elemencie <html>.",
+        details: "Czytniki ekranu używają tego atrybutu do wybrania właściwego syntezatora mowy i reguł wymowy.",
+        examples: "<html lang=\"pl\"> dla stron w języku polskim.",
+        auditError: "Strona w całości po polsku nie posiada atrybutu lang w tagu <html> lub posiada błędny atrybut lang='en'.",
+        tags: ["język", "lang", "html", "syntezator"]
+      },
+      {
+        id: "3.1.2",
+        name: "Język części",
+        nameEn: "Language of Parts",
+        principle: 3,
+        level: "AA",
+        version: "2.0",
+        summary: "Wtrącenia i fragmenty tekstu w języku innym niż domyślny język strony muszą mieć określony atrybut lang.",
+        details: "Dzięki temu czytnik poprawnie przeczyta obcojęzyczny cytat lub frazę zamiast kaleczyć wymowę polskim syntezatorem.",
+        examples: "Zajęcia z <span lang=\"en\">accessibility</span> są bardzo ciekawe.",
+        auditError: "W polskim tekście zacytowano zdanie w języku niemieckim bez oznaczenia <span lang='de'>, przez co syntezator czyta je z polską wymową.",
+        tags: ["język", "lang", "cytat", "wymowa"]
+      },
+      {
+        id: "3.2.1",
+        name: "Po otrzymaniu fokusu",
+        nameEn: "On Focus",
+        principle: 3,
+        level: "A",
+        version: "2.0",
+        summary: "Samo otrzymanie fokusu przez komponent interfejsu nie może wywołać niespodziewanej zmiany kontekstu.",
+        details: "Niedopuszczalne jest automatyczne wysyłanie formularza, otwieranie nowego okna czy przenoszenie na inną podstronę tylko dlatego, że ktoś wszedł na pole klawiszem Tab.",
+        examples: "Nawigacja klawiaturą po polach formularza bez nagłych przekierowań.",
+        auditError: "Przejście klawiszem Tab na pole rozwijane wyboru kraju natychmiast przeładowuje stronę bez kliknięcia przycisku.",
+        tags: ["fokus", "kontekst", "formularz", "przewidywalność"]
+      },
+      {
+        id: "3.2.2",
+        name: "Podczas wprowadzania danych",
+        nameEn: "On Input",
+        principle: 3,
+        level: "A",
+        version: "2.0",
+        summary: "Zmiana wartości pola (zaznaczenie checkboxa, wybór opcji z <select>) nie może automatycznie zmieniać kontekstu bez uprzedzenia.",
+        details: "Jeśli wybór z listy przekierowuje na inną stronę, użytkownik musi być o tym poinformowany wcześniej lub zatwierdzić akcję przyciskiem 'Przejdź'.",
+        examples: "Lista wyboru kraju z osobnym przyciskiem 'Zatwierdź' zamiast automatycznego submit po onchange.",
+        auditError: "Zaznaczenie checkboxa 'Chcę fakturę' w trakcie wypełniania formularza powoduje niespodziewane automatyczne wysłanie danych.",
+        tags: ["input", "select", "kontekst", "formularz"]
+      },
+      {
+        id: "3.2.3",
+        name: "Spójna nawigacja",
+        nameEn: "Consistent Navigation",
+        principle: 3,
+        level: "AA",
+        version: "2.0",
+        summary: "Powtarzające się mechanizmy nawigacyjne (np. menu główne, wyszukiwarka) występują w tej samej kolejności na wszystkich podstronach.",
+        details: "Daje użytkownikom poczucie stabilności i ułatwia szybkie odnajdywanie znanych elementów serwisu.",
+        examples: "Menu główne i wyszukiwarka w nagłówku zawsze w tym samym układzie w całym portalu.",
+        auditError: "Wyszukiwarka na stronie głównej znajduje się w prawym górnym rogu, a na podstronie bloga została przeniesiona na sam dół pod stopkę.",
+        tags: ["nawigacja", "spójność", "menu", "układ"]
+      },
+      {
+        id: "3.2.4",
+        name: "Spójna identyfikacja",
+        nameEn: "Consistent Identification",
+        principle: 3,
+        level: "AA",
+        version: "2.0",
+        summary: "Komponenty realizujące tę samą funkcję są identyfikowane w spójny sposób w całym serwisie.",
+        details: "Jeśli ikona lupy oznacza wyszukiwanie na stronie głównej, nie powinna oznaczać powiększania zdjęcia na podstronie artykułu.",
+        examples: "Spójne ikony pobierania pliku, logowania czy koszyka we wszystkich widokach.",
+        auditError: "Ikona lupy na podstronie głównej oznacza szukanie artykułów, a na podstronie sklepu ta sama ikona służy do powiększania zdjęcia.",
+        tags: ["ikony", "identyfikacja", "spójność"]
+      },
+      {
+        id: "3.2.6",
+        name: "Spójna pomoc",
+        nameEn: "Consistent Help",
+        principle: 3,
+        level: "A",
+        version: "2.2",
+        summary: "NOWOŚĆ WCAG 2.2! Jeśli witryna oferuje mechanizmy pomocy (kontakt, czat, FAQ), muszą znajdować się one w tym samym miejscu na każdej podstronie.",
+        details: "Użytkownik w razie trudności nie musi błądzić po serwisie, szukając, gdzie tym razem umieszczono pomoc lub numer infolinii.",
+        examples: "Widget czatu lub link do pomocy umieszczony zawsze w prawym dolnym rogu każdej podstrony.",
+        auditError: "Numer telefonu na infolinię oraz link do pomocy na podstronie kontaktu są w nagłówku, a w procesie koszyka zostały całkowicie ukryte.",
+        tags: ["wcag22", "nowość", "pomoc", "czat", "kontakt", "spójność"]
+      },
+      {
+        id: "3.3.1",
+        name: "Identyfikacja błędu",
+        nameEn: "Error Identification",
+        principle: 3,
+        level: "A",
+        version: "2.0",
+        summary: "W przypadku wykrycia błędu wprowadzania danych, błędne pole musi być jednoznacznie wskazane, a błąd opisany użytkownikowi tekstem.",
+        details: "Nie wystarczy samo podświetlenie pola na czerwono. Wymagany jest czytelny komunikat tekstowy (np. 'Podaj poprawny adres e-mail').",
+        examples: "Komunikat błędu powiązany z polem za pomocą atrybutu aria-describedby.",
+        auditError: "Użytkownik pominął obowiązkowe pole numeru telefonu, a strona po próbie wysłania nie wskazuje, które pole zawiera błąd.",
+        tags: ["błąd", "formularz", "walidacja", "komunikat"]
+      },
+      {
+        id: "3.3.2",
+        name: "Etykiety lub instrukcje",
+        nameEn: "Labels or Instructions",
+        principle: 3,
+        level: "A",
+        version: "2.0",
+        summary: "Pola formularza wymagające wprowadzenia danych posiadają jasne etykiety tekstowe lub instrukcje formatu.",
+        details: "Podaj wymagany format daty (np. RRRR-MM-DD), wymagania dotyczące hasła lub informację o polach obowiązkowych.",
+        examples: "<label for=\"date\">Data urodzenia (format: DD.MM.RRRR)</label>",
+        auditError: "Pole numeru PESEL wymaga wpisania 11 cyfr, ale formularz nie zawiera żadnej etykiety ani instrukcji formatu przed wysłaniem.",
+        tags: ["etykieta", "instrukcja", "formularz", "format"]
+      },
+      {
+        id: "3.3.3",
+        name: "Sugestie dotyczące błędów",
+        nameEn: "Error Suggestion",
+        principle: 3,
+        level: "AA",
+        version: "2.0",
+        summary: "Jeśli błąd zostanie wykryty i znane są sposoby jego naprawy, serwis powinien podać konkretne sugestie poprawienia błędu.",
+        details: "Zamiast pisać 'Błędna data', napisz: 'Data nie może być wcześniejsza niż dzisiejsza (wprowadź datę od 01.01.2026)'.",
+        examples: "Wykryto literówkę: 'Czy miałeś na myśli jan@gmail.com zamiast jan@gmai.com?'.",
+        auditError: "System odrzuca adres e-mail z błędem 'Błędny adres', ale nie podaje podpowiedzi, np. 'Brak znaku @ w adresie'.",
+        tags: ["sugestia", "błąd", "podpowiedź", "formularz"]
+      },
+      {
+        id: "3.3.4",
+        name: "Zapobieganie błędom (prawne, finansowe, dane)",
+        nameEn: "Error Prevention (Legal, Financial, Data)",
+        principle: 3,
+        level: "AA",
+        version: "2.0",
+        summary: "Dla operacji powodujących skutki prawne, transakcje finansowe lub usunięcie danych operacja musi być odwracalna, sprawdzana lub potwierdzana.",
+        details: "Użytkownik musi mieć ekran podsumowania z opcją weryfikacji danych przed ostatecznym kliknięciem 'Kupuję i płacę'.",
+        examples: "Krok podsumowujący zamówienie z możliwością poprawienia adresu i danych karty.",
+        auditError: "Przycisk 'Zatwierdź przelew na 10 000 zł' wykonuje transakcję natychmiast bez ekranu podsumowania i potwierdzenia danych odbiorcy.",
+        tags: ["transakcja", "pieniądze", "potwierdzenie", "formularz"]
+      },
+      {
+        id: "3.3.7",
+        name: "Nadmiarowe wprowadzanie danych",
+        nameEn: "Redundant Entry",
+        principle: 3,
+        level: "A",
+        version: "2.2",
+        summary: "NOWOŚĆ WCAG 2.2! Informacje wcześniej wprowadzone przez użytkownika w tym samym procesie muszą być automatycznie wypełnione lub dostępne do wyboru.",
+        details: "Osoby z trudnościami poznawczymi lub ruchowymi nie powinny wpisywać wielokrotnie tego samego adresu czy numeru telefonu w jednym procesie.",
+        examples: "Checkbox: 'Adres do faktury jest taki sam jak adres dostawy'.",
+        auditError: "Formularz rezerwacji hotelowej wymaga ponownego ręcznego wpisania adresu gościa na 3 kolejnych krokach rezerwacji.",
+        tags: ["wcag22", "nowość", "formularz", "kopiowanie", "dane"]
+      },
+      {
+        id: "3.3.8",
+        name: "Dostępne uwierzytelnianie (minimum)",
+        nameEn: "Accessible Authentication (Minimum)",
+        principle: 3,
+        level: "AA",
+        version: "2.2",
+        summary: "NOWOŚĆ WCAG 2.2! Proces logowania nie może wymagać rozwiązywania testu poznawczego (zagadek, zadań pamięciowych, transkrypcji znaków) bez alternatywy.",
+        details: "Logowanie musi wspierać menedżery haseł (możliwość wklejenia hasła), logowanie biometryczne (WebAuthn/Passkeys) lub linki email.",
+        examples: "Zezwolenie na wklejanie hasła ze schowka (brak blokady onpaste) i wsparcie dla kluczy dostępu Passkey.",
+        auditError: "Ekran logowania blokuje wklejanie hasła ze schowka (zakaz menedżerów haseł) i wymaga rozwiązywania puzzli obrazkowych.",
+        tags: ["wcag22", "nowość", "logowanie", "hasło", "bezpieczeństwo", "menedżer"]
+      },
+
+      /* --- ZASADA 4: SOLIDNOŚĆ (RZETELNOŚĆ) --- */
+      {
+        id: "4.1.2",
+        name: "Nazwa, rola, wartość",
+        nameEn: "Name, Role, Value",
+        principle: 4,
+        level: "A",
+        version: "2.0",
+        summary: "Dla wszystkich komponentów interfejsu użytkownika nazwa, rola i stan/wartość muszą być dostępne programowo (poprzez semantyczny HTML lub ARIA).",
+        details: "Fundament dostępności widgetów: przycisk musi anonsować się jako button (rola), mieć nazwę dostępną oraz stan (np. aria-expanded=\"true\").",
+        examples: "<button type=\"button\" aria-expanded=\"false\" aria-controls=\"menu\">Menu</button>",
+        auditError: "Własny komponent rozwijany (dropdown) to zwykłe tagi <div> bez roli role='combobox', bez tabindex='0' i bez stanu aria-expanded.",
+        tags: ["aria", "rola", "stan", "name", "role", "value", "komponenty"]
+      },
+      {
+        id: "4.1.3",
+        name: "Komunikaty o stanie",
+        nameEn: "Status Messages",
+        principle: 4,
+        level: "AA",
+        version: "2.1",
+        summary: "Komunikaty o stanie systemu (sukces, alert, liczba wyników) muszą być ogłaszane czytnikom ekranu bez wymuszonego przenoszenia fokusu.",
+        details: "Stosowanie atrybutu aria-live=\"polite\" lub roli role=\"status\" / role=\"alert\". Nie przenosimy tam kursora, by nie przerywać pracy użytkownikowi.",
+        examples: "<div role=\"status\" aria-live=\"polite\">Dodano produkt do koszyka (łącznie 3 szt.)</div>",
+        auditError: "Po pomyślnym dodaniu produktu do koszyka pojawia się napis, ale brak atrybutu aria-live='polite', więc czytnik ekranu go nie odczytuje.",
+        tags: ["aria-live", "komunikat", "status", "powiadomienie"]
+      }
+    ];
+
+    /* ==========================================================================
+       STORAGE MANAGER (LOCALSTORAGE)
+       ========================================================================== */
+    const STORAGE_KEY = "wcag_unified_progress_v1";
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultProgress();
+        return JSON.parse(raw);
+      } catch (e) {
+        return getDefaultProgress();
+      }
+    }
+
+    function saveProgress(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function getDefaultProgress() {
+      const items = {};
+      WCAG_CRITERIA.forEach(c => {
+        items[c.id] = { status: "new", reviewCount: 0, lastReviewed: null };
+      });
+      return {
+        items,
+        quizStats: { taken: 0, bestScore: 0 }
+      };
+    }
+
+    let appState = loadProgress();
+    WCAG_CRITERIA.forEach(c => {
+      if (!appState.items[c.id]) {
+        appState.items[c.id] = { status: "new", reviewCount: 0, lastReviewed: null };
+      }
+    });
+
+    /* ==========================================================================
+       STAN & ELEMENTY FISZEK (HUB KATEGORII & WARIANTY)
+       ========================================================================== */
+    let currentDeck = [...WCAG_CRITERIA];
+    let currentCardIndex = 0;
+    let isFlipped = false;
+    let currentCategoryKey = "all";
+    let currentCardMode = localStorage.getItem("wcag_flashcard_mode") || "code-to-desc";
+
+    const flashcardsHubEl = document.getElementById("flashcards-hub");
+    const flashcardsSessionEl = document.getElementById("flashcards-session");
+    const hubStep1El = document.getElementById("hub-step-1");
+    const hubStep2El = document.getElementById("hub-step-2");
+    const hubStep3El = document.getElementById("hub-step-3");
+    const scopeCardsGridEl = document.getElementById("scope-cards-grid");
+    const categoryCardsGridEl = document.getElementById("category-cards-grid");
+    const sessionCategoryLabelEl = document.getElementById("session-category-label");
+    const step2VariantBadgeEl = document.getElementById("step2-variant-badge");
+    const btnStep1Next = document.getElementById("btn-step1-next");
+    const btnBackStep1 = document.getElementById("btn-back-step1");
+    const btnBackStep2 = document.getElementById("btn-back-step2");
+    const btnBackHub = document.getElementById("btn-back-hub");
+
+    let currentHubStep = 1;
+    let lastHubStep = 2;
+
+    const flashcardEl = document.getElementById("flashcard");
+    const cardSceneEl = document.getElementById("card-scene");
+    const cardCounterEl = document.getElementById("card-counter");
+    const cardPrincipleBadgeEl = document.getElementById("card-principle-badge");
+    const cardLevelBadgeEl = document.getElementById("card-level-badge");
+    const cardVersionBadgeEl = document.getElementById("card-version-badge");
+    const cardStatusBadgeEl = document.getElementById("card-status-badge");
+    const cardBackCodeEl = document.getElementById("card-back-code");
+    const announcerEl = document.getElementById("aria-announcer");
+
+    const PRINCIPLE_NAMES = {
+      1: "Postrzegalność",
+      2: "Funkcjonalność",
+      3: "Zrozumiałość",
+      4: "Solidność"
+    };
+
+    function formatCode(text) {
+      if (!text) return "";
+      if (text.includes("&lt;") || text.includes("<code")) {
+        return text;
+      }
+      return text.replace(/<([^>]+)>/g, (match, tagContent) => {
+        return `<code class="code-pill">&lt;${tagContent}&gt;</code>`;
+      });
+    }
+
+    const SCOPE_DEFINITIONS = [
+      {
+        key: "all",
+        title: "Wszystkie kryteria sukcesu",
+        tag: "★ PEŁNA NORMA",
+        sub: "Pełny zestaw normy WCAG 2.1 & 2.2 (poziomy A i AA)",
+        featured: true,
+        filter: () => [...WCAG_CRITERIA]
+      },
+      {
+        key: "review",
+        title: "Karty do powtórzenia",
+        tag: "○ POWTÓRKA",
+        sub: "Fiszki oznaczone klawiszem 1 jako wymagające utrwalenia",
+        featured: true,
+        filter: () => WCAG_CRITERIA.filter(c => appState.items[c.id]?.status === "review")
+      },
+      {
+        key: "by_category",
+        title: "Wybierz konkretną kategorię",
+        tag: "ZASADY & WCAG 2.2",
+        sub: "Przejdź do wyboru wg 4 zasad POUR, nowości 2.2 lub opanowanych",
+        featured: false,
+        isSubmenu: true
+      }
+    ];
+
+    const CATEGORY_DEFINITIONS = [
+      { key: "p1", title: "1. Postrzegalność", tag: "ZASADA 1", sub: "Grafiki, multimedia, kontrast, reflow", filter: () => WCAG_CRITERIA.filter(c => c.principle === 1) },
+      { key: "p2", title: "2. Funkcjonalność", tag: "ZASADA 2", sub: "Klawiatura, fokus, czas, gesty, dotyk", filter: () => WCAG_CRITERIA.filter(c => c.principle === 2) },
+      { key: "p3", title: "3. Zrozumiałość", tag: "ZASADA 3", sub: "Formularze, błędy, język, pomoc", filter: () => WCAG_CRITERIA.filter(c => c.principle === 3) },
+      { key: "p4", title: "4. Solidność", tag: "ZASADA 4", sub: "Semantyka ARIA, komunikaty o stanie", filter: () => WCAG_CRITERIA.filter(c => c.principle === 4) },
+      { key: "wcag22", title: "Nowości WCAG 2.2", tag: "NOWOŚCI 2.2", sub: "Fokus niezasłonięty, przeciąganie, 24px", filter: () => WCAG_CRITERIA.filter(c => c.version === "2.2") },
+      { key: "learned", title: "Opanowane", tag: "OPANOWANE", sub: "Pomyślnie przyswojone kryteria", filter: () => WCAG_CRITERIA.filter(c => appState.items[c.id]?.status === "learned") }
+    ];
+
+    function announce(text) {
+      if (announcerEl) announcerEl.textContent = text;
+    }
+
+    function goToHubStep(step) {
+      currentHubStep = step;
+      if (hubStep1El) hubStep1El.style.display = (step === 1 ? "block" : "none");
+      if (hubStep2El) hubStep2El.style.display = (step === 2 ? "block" : "none");
+      if (hubStep3El) hubStep3El.style.display = (step === 3 ? "block" : "none");
+
+      if (step === 2) {
+        if (step2VariantBadgeEl) {
+          const names = {
+            "code-to-desc": "WARIANT 01 · KOD → OPIS",
+            "desc-to-code": "WARIANT 02 · OPIS → KOD",
+            "error-to-code": "WARIANT 03 · BŁĄD → KOD"
+          };
+          step2VariantBadgeEl.textContent = names[currentCardMode] || "WARIANT 01";
+        }
+        renderHubScopes();
+        announce("Krok 2: Wybierz zakres fiszek.");
+      } else if (step === 3) {
+        renderCategoryGrid();
+        announce("Krok 3: Wybierz zasadę WCAG.");
+      } else if (step === 1) {
+        announce("Krok 1: Wybierz wariant nauki.");
+      }
+    }
+
+    function renderHubScopes() {
+      if (!scopeCardsGridEl) return;
+      scopeCardsGridEl.innerHTML = "";
+
+      SCOPE_DEFINITIONS.forEach(scope => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "category-card-btn" + (scope.featured ? " featured-subtle" : "");
+
+        if (scope.isSubmenu) {
+          btn.innerHTML = `
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span class="tag-badge">${scope.tag}</span>
+                <span class="category-card-meta">6 zestawów →</span>
+              </div>
+              <div class="category-card-name">${scope.title}</div>
+            </div>
+            <div class="category-card-desc">${scope.sub}</div>
+          `;
+          btn.addEventListener("click", () => {
+            goToHubStep(3);
+          });
+        } else {
+          const items = scope.filter();
+          const learned = items.filter(c => appState.items[c.id]?.status === "learned").length;
+          let metaText = `${items.length} fiszek`;
+          if (scope.key === "all") {
+            metaText += items.length > 0 ? ` · ${learned} opanowanych` : "";
+          } else if (scope.key === "review") {
+            metaText = items.length === 0 ? "0 fiszek (brak)" : `${items.length} do nauki`;
+          }
+
+          btn.innerHTML = `
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span class="tag-badge" style="${scope.featured ? 'color: var(--text-primary); border-color: currentColor;' : ''}">${scope.tag}</span>
+                <span class="category-card-meta">${metaText}</span>
+              </div>
+              <div class="category-card-name">${scope.title}</div>
+            </div>
+            <div class="category-card-desc">${scope.sub}</div>
+          `;
+
+          btn.addEventListener("click", () => {
+            if (scope.key === "review" && items.length === 0) {
+              alert("Nie masz jeszcze żadnych fiszek oznaczonych do powtórki. Wybierz 'Wszystkie kryteria' i podczas nauki klikaj 'Powtórz' (klawisz 1) przy trudniejszych kryteriach!");
+              return;
+            }
+            startDeckSession(scope, 2);
+          });
+        }
+
+        scopeCardsGridEl.appendChild(btn);
+      });
+    }
+
+    function renderCategoryGrid() {
+      if (!categoryCardsGridEl) return;
+      categoryCardsGridEl.innerHTML = "";
+
+      CATEGORY_DEFINITIONS.forEach(cat => {
+        const items = cat.filter();
+        const learned = items.filter(c => appState.items[c.id]?.status === "learned").length;
+        
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "category-card-btn";
+        btn.innerHTML = `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span class="tag-badge">${cat.tag}</span>
+              <span class="category-card-meta">${items.length} fiszek ${items.length > 0 ? `· ${learned} opanowanych` : ""}</span>
+            </div>
+            <div class="category-card-name">${cat.title}</div>
+          </div>
+          <div class="category-card-desc">${cat.sub}</div>
+        `;
+
+        btn.addEventListener("click", () => {
+          startDeckSession(cat, 3);
+        });
+
+        categoryCardsGridEl.appendChild(btn);
+      });
+    }
+
+    function setCardMode(mode, announceChange = true) {
+      currentCardMode = mode;
+      localStorage.setItem("wcag_flashcard_mode", mode);
+      
+      document.querySelectorAll("[data-card-mode]").forEach(btn => {
+        const isMatch = btn.getAttribute("data-card-mode") === mode;
+        btn.classList.toggle("active", isMatch);
+        btn.setAttribute("aria-checked", isMatch ? "true" : "false");
+        const dot = btn.querySelector(".variant-dot");
+        if (dot) dot.textContent = isMatch ? "●" : "○";
+      });
+
+      renderCurrentCard();
+      if (announceChange) {
+        const names = {
+          "code-to-desc": "Wariant 1: Kod na awersie, opis na rewersie",
+          "desc-to-code": "Wariant 2: Opis na awersie, kod na rewersie",
+          "error-to-code": "Wariant 3: Błąd z audytu na awersie, kryterium na rewersie"
+        };
+        announce(`Wybrano ${names[mode]}`);
+      }
+    }
+
+    function startDeckSession(cat, fromStep = 2) {
+      lastHubStep = fromStep;
+      currentCategoryKey = cat.key;
+      currentDeck = cat.filter();
+      currentCardIndex = 0;
+      sessionCategoryLabelEl.textContent = cat.title.toUpperCase();
+
+      flashcardsHubEl.style.display = "none";
+      flashcardsSessionEl.style.display = "block";
+
+      renderCurrentCard();
+      announce(`Rozpoczęto zestaw: ${cat.title}. ${currentDeck.length} fiszek.`);
+      cardSceneEl.focus();
+    }
+
+    function returnToHub() {
+      flashcardsSessionEl.style.display = "none";
+      flashcardsHubEl.style.display = "block";
+      goToHubStep(lastHubStep || 2);
+      announce("Powrót do wyboru kategorii fiszek.");
+    }
+
+    btnBackHub.addEventListener("click", returnToHub);
+
+    if (btnStep1Next) {
+      btnStep1Next.addEventListener("click", () => {
+        goToHubStep(2);
+      });
+    }
+
+    if (btnBackStep1) {
+      btnBackStep1.addEventListener("click", () => {
+        goToHubStep(1);
+      });
+    }
+
+    if (btnBackStep2) {
+      btnBackStep2.addEventListener("click", () => {
+        goToHubStep(2);
+      });
+    }
+
+    document.querySelectorAll("[data-card-mode]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = btn.getAttribute("data-card-mode");
+        setCardMode(mode, true);
+        goToHubStep(2);
+      });
+    });
+
+    function renderCurrentCard() {
+      const frontCenter = document.getElementById("card-front-center");
+      const backScroll = document.getElementById("card-back-scroll");
+
+      if (currentDeck.length === 0) {
+        frontCenter.innerHTML = `
+          <div class="card-large-code">—</div>
+          <div style="font-size: 14px; color: var(--text-secondary);">Brak kart w wybranym zestawie</div>
+        `;
+        cardCounterEl.textContent = "00 / 00";
+        cardStatusBadgeEl.textContent = "—";
+        cardBackCodeEl.textContent = "Brak";
+        backScroll.innerHTML = `<p style="color: var(--text-tertiary);">Wybierz inną kategorię.</p>`;
+        return;
+      }
+
+      if (currentCardIndex >= currentDeck.length) currentCardIndex = 0;
+      if (currentCardIndex < 0) currentCardIndex = currentDeck.length - 1;
+
+      const item = currentDeck[currentCardIndex];
+      const mastery = appState.items[item.id] || { status: "new" };
+      
+      const currentPad = String(currentCardIndex + 1).padStart(2, "0");
+      const totalPad = String(currentDeck.length).padStart(2, "0");
+      cardCounterEl.textContent = `${currentPad} / ${totalPad}`;
+
+      cardPrincipleBadgeEl.textContent = `P${item.principle} · ${PRINCIPLE_NAMES[item.principle].toUpperCase()}`;
+      cardLevelBadgeEl.textContent = `POZIOM ${item.level}`;
+
+      if (item.version === "2.2") {
+        cardVersionBadgeEl.style.display = "inline-flex";
+      } else {
+        cardVersionBadgeEl.style.display = "none";
+      }
+
+      if (mastery.status === "learned") {
+        cardStatusBadgeEl.textContent = "● OPANOWANE";
+        cardStatusBadgeEl.style.color = "var(--text-primary)";
+      } else if (mastery.status === "review") {
+        cardStatusBadgeEl.textContent = "○ POWTÓRKA";
+        cardStatusBadgeEl.style.color = "var(--text-secondary)";
+      } else {
+        cardStatusBadgeEl.textContent = "— NOWA";
+        cardStatusBadgeEl.style.color = "var(--text-tertiary)";
+      }
+
+      // Renderowanie wariantu
+      if (currentCardMode === "code-to-desc") {
+        frontCenter.innerHTML = `
+          <div class="card-large-code">${item.id}</div>
+          <span class="section-label" style="margin-bottom: 2px;">KOD KRYTERIUM SUKCESU</span>
+          <p style="margin-top: 10px; font-size: 13.5px; color: var(--text-secondary);">Jaka jest oficjalna nazwa i wymóg tego kryterium?</p>
+        `;
+        cardBackCodeEl.textContent = `${item.id} ${item.name}`;
+        backScroll.innerHTML = `
+          <div>
+            <span class="section-label">Nazwa oficjalna</span>
+            <div style="font-size: 16.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">${item.name}</div>
+            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary);">${item.nameEn}</div>
+          </div>
+          <div>
+            <span class="section-label">Wymóg kryterium</span>
+            <p style="color: var(--text-primary); font-size: 13.5px;">${formatCode(item.summary)}</p>
+          </div>
+          <div class="spec-block">
+            <span class="section-label" style="margin-bottom: 2px; color: inherit;">Parametry techniczne</span>
+            <div>${formatCode(item.details)}</div>
+          </div>
+          <div class="example-block">
+            <span class="section-label" style="margin-bottom: 2px; color: inherit;">Przykład implementacji</span>
+            <div>${formatCode(item.examples)}</div>
+          </div>
+        `;
+        announce(`Wariant 1. Karta ${item.id}. Zgadnij nazwę i wymóg.`);
+      } else if (currentCardMode === "desc-to-code") {
+        frontCenter.innerHTML = `
+          <span class="section-label">ZIDENTYFIKUJ KOD I NAZWĘ:</span>
+          <div class="card-callout-quote">
+            "${formatCode(item.summary)}"
+          </div>
+          <div style="margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);">
+            Zasada ${item.principle} (${PRINCIPLE_NAMES[item.principle]}) · Poziom ${item.level}
+          </div>
+        `;
+        cardBackCodeEl.textContent = `Odpowiedź: ${item.id}`;
+        backScroll.innerHTML = `
+          <div>
+            <div class="card-large-code" style="font-size: 38px; margin-bottom: 4px; text-align: left;">${item.id}</div>
+            <div style="font-size: 16.5px; font-weight: 700; color: var(--text-primary);">${item.name}</div>
+            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary);">${item.nameEn}</div>
+          </div>
+          <div class="spec-block">
+            <span class="section-label" style="margin-bottom: 2px; color: inherit;">Parametry techniczne</span>
+            <div>${formatCode(item.details)}</div>
+          </div>
+          <div class="example-block">
+            <span class="section-label" style="margin-bottom: 2px; color: inherit;">Przykład z audytu</span>
+            <div>${formatCode(item.examples)}</div>
+          </div>
+        `;
+        announce(`Wariant 2. Opis: ${item.summary}. Zgadnij kod i nazwę.`);
+      } else if (currentCardMode === "error-to-code") {
+        frontCenter.innerHTML = `
+          <span class="section-label">BŁĄD Z AUDYTU DOSTĘPNOŚCI:</span>
+          <div class="card-callout-quote">
+            ${formatCode(item.auditError || item.examples)}
+          </div>
+          <div style="margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);">
+            Które kryterium sukcesu WCAG zostało naruszone?
+          </div>
+        `;
+        cardBackCodeEl.textContent = `Naruszone: ${item.id}`;
+        backScroll.innerHTML = `
+          <div>
+            <span class="section-label">Naruszone kryterium</span>
+            <div class="card-large-code" style="font-size: 32px; margin-bottom: 4px; text-align: left;">${item.id} ${item.name}</div>
+            <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px;">Poziom ${item.level} · Zasada ${item.principle} (${PRINCIPLE_NAMES[item.principle]})</div>
+          </div>
+          <div>
+            <span class="section-label">Dlaczego to błąd i jak go naprawić?</span>
+            <p style="color: var(--text-primary); font-size: 13.5px; margin-bottom: 8px;">${formatCode(item.summary)}</p>
+            <div class="spec-block">${formatCode(item.details)}</div>
+          </div>
+          <div class="example-block">
+            <span class="section-label" style="margin-bottom: 2px; color: inherit;">Prawidłowa implementacja</span>
+            <div>${formatCode(item.examples)}</div>
+          </div>
+        `;
+        announce(`Wariant 3. Błąd: ${item.auditError || item.examples}. Zgadnij naruszone kryterium.`);
+      }
+
+      setCardFlip(false);
+    }
+
+    function setCardFlip(flipState) {
+      isFlipped = flipState;
+      if (isFlipped) {
+        flashcardEl.classList.add("is-flipped");
+        cardSceneEl.setAttribute("aria-expanded", "true");
+        if (currentDeck.length > 0) {
+          const item = currentDeck[currentCardIndex];
+          announce(`Rewers: ${item.id} ${item.name}. Wymóg: ${item.summary}`);
+        }
+      } else {
+        flashcardEl.classList.remove("is-flipped");
+        cardSceneEl.setAttribute("aria-expanded", "false");
+      }
+    }
+
+    function toggleFlip() {
+      setCardFlip(!isFlipped);
+    }
+
+    function rateCurrentCard(status) {
+      if (currentDeck.length === 0) return;
+      const item = currentDeck[currentCardIndex];
+      if (!appState.items[item.id]) {
+        appState.items[item.id] = { status: "new", reviewCount: 0, lastReviewed: null };
+      }
+      appState.items[item.id].status = status;
+      appState.items[item.id].reviewCount++;
+      appState.items[item.id].lastReviewed = Date.now();
+      saveProgress(appState);
+
+      const statusText = status === "learned" ? "oznaczono jako opanowane" : "oznaczono do powtórzenia";
+      announce(`${item.id}: ${statusText}`);
+
+      renderCurrentCard();
+      setTimeout(nextCard, 200);
+    }
+
+    function nextCard() {
+      if (currentDeck.length <= 1) return;
+      currentCardIndex = (currentCardIndex + 1) % currentDeck.length;
+      renderCurrentCard();
+    }
+
+    function prevCard() {
+      if (currentDeck.length <= 1) return;
+      currentCardIndex = (currentCardIndex - 1 + currentDeck.length) % currentDeck.length;
+      renderCurrentCard();
+    }
+
+    function shuffleDeck() {
+      for (let i = currentDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+      }
+      currentCardIndex = 0;
+      renderCurrentCard();
+      announce("Talia została wymieszana losowo.");
+    }
+
+    cardSceneEl.addEventListener("click", (e) => {
+      if (e.target.closest("button")) return;
+      toggleFlip();
+    });
+
+    cardSceneEl.addEventListener("keydown", (e) => {
+      if (e.code === "Space" || e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        toggleFlip();
+      } else if (e.key === "Escape") {
+        if (isFlipped) {
+          e.preventDefault();
+          setCardFlip(false);
+          announce("Powrót na awers");
+        }
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        nextCard();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        prevCard();
+      } else if (e.key === "1") {
+        rateCurrentCard("review");
+      } else if (e.key === "2") {
+        rateCurrentCard("learned");
+      }
+    });
+
+    document.getElementById("btn-flip-back").addEventListener("click", (e) => {
+      e.stopPropagation();
+      setCardFlip(false);
+    });
+
+    document.getElementById("btn-next-card").addEventListener("click", nextCard);
+    document.getElementById("btn-prev-card").addEventListener("click", prevCard);
+
+    document.getElementById("btn-rate-again").addEventListener("click", () => rateCurrentCard("review"));
+    document.getElementById("btn-rate-good").addEventListener("click", () => rateCurrentCard("learned"));
+
+    /* ==========================================================================
+       WIDOK 2: QUIZ
+       ========================================================================== */
+    let quizQuestions = [];
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+    let selectedQuestionCount = 5;
+    let quizAnswered = false;
+
+    const quizStartScreen = document.getElementById("quiz-start-screen");
+    const quizActiveScreen = document.getElementById("quiz-active-screen");
+    const quizResultScreen = document.getElementById("quiz-result-screen");
+    const quizOptionsEl = document.getElementById("quiz-options");
+    const quizFeedbackEl = document.getElementById("quiz-feedback");
+    const quizFeedbackTitle = document.getElementById("quiz-feedback-title");
+    const quizFeedbackBody = document.getElementById("quiz-feedback-body");
+    const btnQuizNext = document.getElementById("btn-quiz-next");
+    const quizProgressFill = document.getElementById("quiz-progress-fill");
+
+    document.querySelectorAll("[data-qcount]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-qcount]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedQuestionCount = parseInt(btn.getAttribute("data-qcount"), 10);
+      });
+    });
+
+    function generateQuizQuestions(count) {
+      const shuffled = [...WCAG_CRITERIA].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, count);
+
+      return selected.map((target, idx) => {
+        const qTypes = ["code_to_name", "desc_to_code", "level", "principle"];
+        const type = qTypes[idx % qTypes.length];
+        
+        let questionText = "";
+        let questionTypeLabel = "";
+        let correctAnswer = "";
+        let options = [];
+        let explanation = "";
+
+        if (type === "code_to_name") {
+          questionTypeLabel = "DOPASUJ NAZWĘ KRYTERIUM";
+          questionText = `Jaką oficjalną nazwę nosi kryterium sukcesu ${target.id}?`;
+          correctAnswer = target.name;
+          explanation = `Kryterium ${target.id} to "${target.name}" (${target.nameEn}) na poziomie ${target.level}.`;
+
+          const distractors = WCAG_CRITERIA
+            .filter(c => c.id !== target.id)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3)
+            .map(c => c.name);
+          options = [correctAnswer, ...distractors].sort(() => 0.5 - Math.random());
+
+        } else if (type === "desc_to_code") {
+          questionTypeLabel = "IDENTYFIKACJA KODU";
+          questionText = `Które kryterium sukcesu wymaga: "${target.summary}"?`;
+          correctAnswer = `${target.id} ${target.name}`;
+          explanation = `To kryterium ${target.id}: ${target.name}.`;
+
+          const distractors = WCAG_CRITERIA
+            .filter(c => c.id !== target.id)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 3)
+            .map(c => `${c.id} ${c.name}`);
+          options = [correctAnswer, ...distractors].sort(() => 0.5 - Math.random());
+
+        } else if (type === "level") {
+          questionTypeLabel = "POZIOM ZGODNOŚCI (A / AA / AAA)";
+          questionText = `Do jakiego poziomu zgodności należy kryterium ${target.id} ${target.name}?`;
+          correctAnswer = `Poziom ${target.level}`;
+          explanation = `Kryterium ${target.id} ${target.name} znajduje się na poziomie ${target.level} (${target.version}).`;
+          options = ["Poziom A", "Poziom AA", "Poziom AAA"].sort();
+
+        } else {
+          questionTypeLabel = "ZASADA WCAG";
+          questionText = `Do której z 4 zasad WCAG należy kryterium ${target.id} ${target.name}?`;
+          correctAnswer = `Zasada ${target.principle}: ${PRINCIPLE_NAMES[target.principle]}`;
+          explanation = `Kryterium ${target.id} należy do Zasady ${target.principle} (${PRINCIPLE_NAMES[target.principle]}).`;
+          options = [
+            "Zasada 1: Postrzegalność",
+            "Zasada 2: Funkcjonalność",
+            "Zasada 3: Zrozumiałość",
+            "Zasada 4: Solidność"
+          ];
+        }
+
+        return {
+          target,
+          typeLabel: questionTypeLabel,
+          question: questionText,
+          correct: correctAnswer,
+          options,
+          explanation
+        };
+      });
+    }
+
+    function startQuiz() {
+      quizQuestions = generateQuizQuestions(selectedQuestionCount);
+      currentQuizIndex = 0;
+      quizScore = 0;
+      quizAnswered = false;
+
+      quizStartScreen.style.display = "none";
+      quizResultScreen.style.display = "none";
+      quizActiveScreen.style.display = "block";
+
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      quizAnswered = false;
+      btnQuizNext.style.display = "none";
+      quizFeedbackEl.className = "quiz-feedback-box";
+
+      const q = quizQuestions[currentQuizIndex];
+      const curPad = String(currentQuizIndex + 1).padStart(2, "0");
+      const totPad = String(quizQuestions.length).padStart(2, "0");
+      
+      document.getElementById("quiz-question-counter").textContent = `Pytanie ${curPad} / ${totPad}`;
+      document.getElementById("quiz-score-live").textContent = `PUNKTY: ${String(quizScore).padStart(2, "0")}`;
+      document.getElementById("quiz-question-type").textContent = q.typeLabel;
+      document.getElementById("quiz-question-text").textContent = q.question;
+
+      const progressPct = ((currentQuizIndex) / quizQuestions.length) * 100;
+      quizProgressFill.style.width = `${progressPct}%`;
+
+      quizOptionsEl.innerHTML = "";
+      const letters = ["A", "B", "C", "D"];
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "quiz-option-btn";
+        btn.innerHTML = `
+          <span class="opt-key-badge">${letters[idx] || (idx + 1)}</span>
+          <span>${opt}</span>
+        `;
+        btn.addEventListener("click", () => handleQuizAnswer(opt, btn, q));
+        quizOptionsEl.appendChild(btn);
+      });
+
+      announce(`Pytanie ${currentQuizIndex + 1}: ${q.question}`);
+    }
+
+    function handleQuizAnswer(selectedOption, clickedBtn, questionObj) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+
+      const allBtns = quizOptionsEl.querySelectorAll(".quiz-option-btn");
+      allBtns.forEach(b => b.disabled = true);
+
+      const isCorrect = (selectedOption === questionObj.correct);
+
+      if (isCorrect) {
+        clickedBtn.classList.add("is-correct");
+        quizScore++;
+        document.getElementById("quiz-score-live").textContent = `PUNKTY: ${String(quizScore).padStart(2, "0")}`;
+        quizFeedbackEl.className = "quiz-feedback-box show";
+        quizFeedbackTitle.textContent = "ODPOWIEDŹ PRAWIDŁOWA";
+        quizFeedbackBody.textContent = questionObj.explanation;
+        announce(`Poprawna odpowiedź. ${questionObj.explanation}`);
+      } else {
+        clickedBtn.classList.add("is-wrong");
+        allBtns.forEach(b => {
+          if (b.innerText.includes(questionObj.correct)) {
+            b.classList.add("is-correct");
+          }
+        });
+        quizFeedbackEl.className = "quiz-feedback-box show";
+        quizFeedbackTitle.textContent = `NIEPRAWIDŁOWO (PRAWIDŁOWA: ${questionObj.correct})`;
+        quizFeedbackBody.textContent = questionObj.explanation;
+        announce(`Niepoprawna odpowiedź. Poprawna to: ${questionObj.correct}.`);
+      }
+
+      btnQuizNext.style.display = "flex";
+      btnQuizNext.focus();
+    }
+
+    function nextQuizQuestion() {
+      currentQuizIndex++;
+      if (currentQuizIndex < quizQuestions.length) {
+        renderQuizQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      quizActiveScreen.style.display = "none";
+      quizResultScreen.style.display = "block";
+
+      const total = quizQuestions.length;
+      const pct = Math.round((quizScore / total) * 100);
+
+      document.getElementById("result-score-circle").textContent = `${pct}%`;
+      document.getElementById("result-desc").textContent = `Wynik: ${quizScore} z ${total} punktów (${pct}%).`;
+
+      const titleEl = document.getElementById("result-title");
+      if (pct === 100) titleEl.textContent = "Perfekcyjny wynik";
+      else if (pct >= 80) titleEl.textContent = "Świetna znajomość";
+      else if (pct >= 60) titleEl.textContent = "Dobry wynik";
+      else titleEl.textContent = "Warto powtórzyć fiszki";
+
+      if (!appState.quizStats) appState.quizStats = { taken: 0, bestScore: 0 };
+      appState.quizStats.taken++;
+      if (pct > appState.quizStats.bestScore) appState.quizStats.bestScore = pct;
+      saveProgress(appState);
+
+      announce(`Koniec quizu. Wynik: ${pct}%.`);
+    }
+
+    document.getElementById("btn-start-quiz").addEventListener("click", startQuiz);
+    btnQuizNext.addEventListener("click", nextQuizQuestion);
+    document.getElementById("btn-quiz-restart").addEventListener("click", () => {
+      quizResultScreen.style.display = "none";
+      quizStartScreen.style.display = "block";
+    });
+    document.getElementById("btn-quiz-review-cards").addEventListener("click", () => {
+      switchTab("panel-flashcards");
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+      if (quizActiveScreen.style.display !== "none") {
+        if (!quizAnswered) {
+          const key = e.key.toUpperCase();
+          const keyMap = { "1": 0, "A": 0, "2": 1, "B": 1, "3": 2, "C": 2, "4": 3, "D": 3 };
+          if (keyMap.hasOwnProperty(key)) {
+            const btns = quizOptionsEl.querySelectorAll(".quiz-option-btn");
+            const btnIdx = keyMap[key];
+            if (btns[btnIdx]) {
+              e.preventDefault();
+              btns[btnIdx].click();
+            }
+          }
+        } else if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
+          if (btnQuizNext.style.display !== "none") {
+            e.preventDefault();
+            nextQuizQuestion();
+          }
+        }
+      }
+    });
+
+    /* ==========================================================================
+       WIDOK 3: KATALOG
+       ========================================================================== */
+    const catalogSearchInput = document.getElementById("catalog-search");
+    const btnClearSearch = document.getElementById("btn-clear-search");
+    const criteriaListEl = document.getElementById("criteria-list");
+    const catalogCountLabel = document.getElementById("catalog-count-label");
+
+    let currentCatalogFilter = "all";
+    let catalogSearchQuery = "";
+
+    function renderCatalog() {
+      const q = catalogSearchQuery.toLowerCase().trim();
+
+      const filtered = WCAG_CRITERIA.filter(item => {
+        if (currentCatalogFilter === "p1" && item.principle !== 1) return false;
+        if (currentCatalogFilter === "p2" && item.principle !== 2) return false;
+        if (currentCatalogFilter === "p3" && item.principle !== 3) return false;
+        if (currentCatalogFilter === "p4" && item.principle !== 4) return false;
+        if (currentCatalogFilter === "lvl-a" && item.level !== "A") return false;
+        if (currentCatalogFilter === "lvl-aa" && item.level !== "AA") return false;
+        if (currentCatalogFilter === "wcag22" && item.version !== "2.2") return false;
+
+        if (q) {
+          const matchId = item.id.toLowerCase().includes(q);
+          const matchName = item.name.toLowerCase().includes(q);
+          const matchNameEn = item.nameEn.toLowerCase().includes(q);
+          const matchSummary = item.summary.toLowerCase().includes(q);
+          const matchTags = item.tags.some(t => t.toLowerCase().includes(q));
+          return matchId || matchName || matchNameEn || matchSummary || matchTags;
+        }
+
+        return true;
+      });
+
+      catalogCountLabel.textContent = `${filtered.length} KRYTERIÓW W BAZIE`;
+      criteriaListEl.innerHTML = "";
+
+      if (filtered.length === 0) {
+        criteriaListEl.innerHTML = `
+          <div style="text-align: center; padding: 32px 16px; color: var(--text-tertiary); font-family: var(--font-mono); font-size: 13px;">
+            Brak wyników dla podanych filtrów.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const mastery = appState.items[item.id] || { status: "new" };
+        let statusTag = `<span class="tag-badge">— NOWA</span>`;
+        if (mastery.status === "learned") {
+          statusTag = `<span class="tag-badge" style="color: var(--text-primary); border-color: var(--text-primary);">● OPANOWANA</span>`;
+        } else if (mastery.status === "review") {
+          statusTag = `<span class="tag-badge" style="color: var(--text-secondary);">○ POWTÓRKA</span>`;
+        }
+
+        const div = document.createElement("div");
+        div.className = "catalog-item-row";
+        div.tabIndex = 0;
+        div.setAttribute("role", "button");
+        div.setAttribute("aria-expanded", "false");
+        div.innerHTML = `
+          <div class="catalog-item-top">
+            <div>
+              <div class="catalog-item-code">${item.id}</div>
+              <div class="catalog-item-title">${item.name}</div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+                <span class="tag-badge">P${item.principle}</span>
+                <span class="tag-badge">${item.level}</span>
+                ${item.version === "2.2" ? `<span class="tag-badge">2.2</span>` : ""}
+                ${statusTag}
+              </div>
+            </div>
+            <span style="font-family: var(--font-mono); font-size: 13px; color: var(--text-tertiary);">↓</span>
+          </div>
+          <div class="catalog-item-body">
+            <div>
+              <span class="section-label" style="margin-bottom: 2px;">Nazwa oryginalna (EN)</span>
+              <div style="font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary);">${item.nameEn}</div>
+            </div>
+            <div style="margin-top: 8px;">
+              <span class="section-label" style="margin-bottom: 2px;">Wymóg normy</span>
+              <p style="color: var(--text-primary); font-size: 13px;">${formatCode(item.summary)}</p>
+            </div>
+            <div class="spec-block" style="margin-top: 10px;">
+              <span class="section-label" style="margin-bottom: 2px; color: inherit;">Parametry techniczne</span>
+              <div>${formatCode(item.details)}</div>
+            </div>
+            <div class="example-block" style="margin-top: 8px;">
+              <span class="section-label" style="margin-bottom: 2px; color: inherit;">Przykład implementacji</span>
+              <div>${formatCode(item.examples)}</div>
+            </div>
+          </div>
+        `;
+
+        div.addEventListener("click", () => {
+          const isOpen = div.classList.toggle("is-open");
+          div.setAttribute("aria-expanded", isOpen ? "true" : "false");
+          const arrow = div.querySelector(".catalog-item-top > span:last-child");
+          if (arrow) arrow.textContent = isOpen ? "↑" : "↓";
+        });
+
+        div.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            div.click();
+          }
+        });
+
+        criteriaListEl.appendChild(div);
+      });
+    }
+
+    catalogSearchInput.addEventListener("input", (e) => {
+      catalogSearchQuery = e.target.value;
+      btnClearSearch.style.display = catalogSearchQuery ? "block" : "none";
+      renderCatalog();
+    });
+
+    btnClearSearch.addEventListener("click", () => {
+      catalogSearchInput.value = "";
+      catalogSearchQuery = "";
+      btnClearSearch.style.display = "none";
+      catalogSearchInput.focus();
+      renderCatalog();
+    });
+
+    document.querySelectorAll("[data-filter]").forEach(chip => {
+      chip.addEventListener("click", () => {
+        document.querySelectorAll("[data-filter]").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        currentCatalogFilter = chip.getAttribute("data-filter");
+        renderCatalog();
+      });
+    });
+
+    /* ==========================================================================
+       WIDOK 4: POSTĘPY
+       ========================================================================== */
+    function renderStats() {
+      let learnedCount = 0;
+      let reviewCount = 0;
+      let newCount = 0;
+
+      const principleStats = {
+        1: { learned: 0, total: 0 },
+        2: { learned: 0, total: 0 },
+        3: { learned: 0, total: 0 },
+        4: { learned: 0, total: 0 }
+      };
+
+      WCAG_CRITERIA.forEach(c => {
+        const st = appState.items[c.id]?.status || "new";
+        principleStats[c.principle].total++;
+
+        if (st === "learned") {
+          learnedCount++;
+          principleStats[c.principle].learned++;
+        } else if (st === "review") {
+          reviewCount++;
+        } else {
+          newCount++;
+        }
+      });
+
+      const total = WCAG_CRITERIA.length;
+      const overallPct = Math.round((learnedCount / total) * 100);
+
+      document.getElementById("stat-overall-percent").textContent = `${overallPct}%`;
+      document.getElementById("stat-ratio-label").textContent = `${learnedCount} / ${total} KRYTERIA`;
+      document.getElementById("stat-overall-fill").style.width = `${overallPct}%`;
+
+      document.getElementById("stat-count-learned").textContent = learnedCount;
+      document.getElementById("stat-count-review").textContent = reviewCount;
+      document.getElementById("stat-count-new").textContent = newCount;
+
+      const principlesListEl = document.getElementById("principles-progress-list");
+      principlesListEl.innerHTML = "";
+
+      for (let p = 1; p <= 4; p++) {
+        const pData = principleStats[p];
+        const pPct = Math.round((pData.learned / pData.total) * 100);
+
+        const row = document.createElement("div");
+        row.style.display = "flex";
+        row.style.flexDirection = "column";
+        row.style.gap = "4px";
+        row.innerHTML = `
+          <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; gap: 8px;">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">ZASADA ${p}: ${PRINCIPLE_NAMES[p].toUpperCase()}</span>
+            <span style="white-space: nowrap; flex-shrink: 0;">${pPct}% (${pData.learned}/${pData.total})</span>
+          </div>
+          <div class="hairline-bar" style="margin-bottom: 0; height: 1px;">
+            <div class="hairline-fill-bar" style="width: ${pPct}%;"></div>
+          </div>
+        `;
+        principlesListEl.appendChild(row);
+      }
+
+      const qStats = appState.quizStats || { taken: 0, bestScore: 0 };
+      document.getElementById("stat-quiz-summary").textContent = 
+        `Rozwiązane testy: ${qStats.taken} | Najlepszy wynik: ${qStats.bestScore}%`;
+    }
+
+    document.getElementById("btn-reset-progress").addEventListener("click", () => {
+      if (confirm("Zresetować wszystkie postępy w pamięci lokalnej?")) {
+        appState = getDefaultProgress();
+        saveProgress(appState);
+        renderCurrentCard();
+        renderCatalog();
+        renderStats();
+        renderHomeDashboard();
+        announce("Zresetowano postępy.");
+      }
+    });
+
+    /* ==========================================================================
+       DOCK NAWIGACJA
+       ========================================================================== */
+    const tabButtons = Array.from(document.querySelectorAll(".dock-tab"));
+    const panels = document.querySelectorAll(".tab-panel");
+
+    function switchTab(panelId) {
+      panels.forEach(p => p.classList.remove("active"));
+      tabButtons.forEach(btn => {
+        const isTarget = btn.getAttribute("data-target") === panelId;
+        btn.setAttribute("aria-selected", isTarget ? "true" : "false");
+        btn.setAttribute("tabindex", isTarget ? "0" : "-1");
+      });
+
+      const activePanel = document.getElementById(panelId);
+      if (activePanel) {
+        activePanel.classList.add("active");
+        activePanel.focus();
+      }
+
+      if (panelId === "panel-home") {
+        renderHomeDashboard();
+      } else if (panelId === "panel-flashcards") {
+        if (currentHubStep === 1) goToHubStep(1);
+        else if (currentHubStep === 2) renderHubScopes();
+        else if (currentHubStep === 3) renderCategoryGrid();
+        renderCurrentCard();
+      } else if (panelId === "panel-browse") {
+        renderCatalog();
+      } else if (panelId === "panel-stats") {
+        renderStats();
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    tabButtons.forEach((btn, idx) => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-target");
+        switchTab(target);
+      });
+
+      btn.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          const nextIdx = (idx + 1) % tabButtons.length;
+          tabButtons[nextIdx].focus();
+          switchTab(tabButtons[nextIdx].getAttribute("data-target"));
+        } else if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          const prevIdx = (idx - 1 + tabButtons.length) % tabButtons.length;
+          tabButtons[prevIdx].focus();
+          switchTab(tabButtons[prevIdx].getAttribute("data-target"));
+        }
+      });
+    });
+
+    const logoRefresh = document.getElementById("logo-refresh");
+    if (logoRefresh) {
+      logoRefresh.addEventListener("click", (e) => {
+        e.preventDefault();
+        switchTab("panel-home");
+      });
+    }
+
+    /* ==========================================================================
+       DASHBOARD EKRANU GŁÓWNEGO (HOMESCREEN)
+       ========================================================================== */
+    function renderHomeDashboard() {
+      const learnedCount = WCAG_CRITERIA.filter(c => appState.items[c.id]?.status === "learned").length;
+      const reviewCount = WCAG_CRITERIA.filter(c => appState.items[c.id]?.status === "review").length;
+      const pct = Math.round((learnedCount / WCAG_CRITERIA.length) * 100);
+
+      const homeStatLearned = document.getElementById("home-stat-learned");
+      const homeStatReview = document.getElementById("home-stat-review");
+      const homeStatPct = document.getElementById("home-stat-pct");
+
+      if (homeStatLearned) {
+        homeStatLearned.innerHTML = `<span class="home-stat-val">${learnedCount}</span><span class="home-stat-denom">/${WCAG_CRITERIA.length}</span>`;
+      }
+      if (homeStatReview) homeStatReview.textContent = reviewCount;
+      if (homeStatPct) homeStatPct.textContent = `${pct}%`;
+    }
+
+    // Launchery z ekranu głównego
+    const btnHomeStartFlashcards = document.getElementById("btn-home-start-flashcards");
+    const homeLaunchFlashcards = document.getElementById("home-launch-flashcards");
+    const homeLaunchQuiz = document.getElementById("home-launch-quiz");
+    const homeLaunchBrowse = document.getElementById("home-launch-browse");
+    const homeLaunchStats = document.getElementById("home-launch-stats");
+
+    if (btnHomeStartFlashcards) {
+      btnHomeStartFlashcards.addEventListener("click", () => {
+        switchTab("panel-flashcards");
+        goToHubStep(1);
+      });
+    }
+
+    if (homeLaunchFlashcards) {
+      homeLaunchFlashcards.addEventListener("click", () => {
+        switchTab("panel-flashcards");
+        goToHubStep(1);
+      });
+    }
+
+    if (homeLaunchQuiz) {
+      homeLaunchQuiz.addEventListener("click", () => {
+        switchTab("panel-quiz");
+      });
+    }
+
+    if (homeLaunchBrowse) {
+      homeLaunchBrowse.addEventListener("click", () => {
+        switchTab("panel-browse");
+      });
+    }
+
+    if (homeLaunchStats) {
+      homeLaunchStats.addEventListener("click", () => {
+        switchTab("panel-stats");
+      });
+    }
+
+    /* ==========================================================================
+       THEME & INVERT COLORS
+       ========================================================================== */
+    const btnThemeToggle = document.getElementById("btn-theme-toggle");
+    const btnInvert = document.getElementById("btn-invert");
+    let currentTheme = localStorage.getItem("wcag_app_theme") || "dark";
+    let isInverted = localStorage.getItem("wcag_app_invert") === "true";
+
+    function applyTheme(theme) {
+      currentTheme = theme;
+      if (theme === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+        btnThemeToggle.setAttribute("aria-label", "Przełącz na motyw ciemny");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+        btnThemeToggle.setAttribute("aria-label", "Przełącz na motyw jasny");
+      }
+      localStorage.setItem("wcag_app_theme", theme);
+    }
+
+    function applyInvert(inverted, announceChange = false) {
+      isInverted = inverted;
+      if (isInverted) {
+        document.documentElement.setAttribute("data-invert", "true");
+        btnInvert.setAttribute("aria-pressed", "true");
+        btnInvert.classList.add("active");
+        if (announceChange) announce("Włączono odwrócenie kolorów (wysoki kontrast)");
+      } else {
+        document.documentElement.removeAttribute("data-invert");
+        btnInvert.setAttribute("aria-pressed", "false");
+        btnInvert.classList.remove("active");
+        if (announceChange) announce("Wyłączono odwrócenie kolorów");
+      }
+      localStorage.setItem("wcag_app_invert", isInverted ? "true" : "false");
+    }
+
+    applyTheme(currentTheme);
+    applyInvert(isInverted, false);
+
+    btnThemeToggle.addEventListener("click", () => {
+      applyTheme(currentTheme === "dark" ? "light" : "dark");
+    });
+
+    btnInvert.addEventListener("click", () => {
+      applyInvert(!isInverted, true);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if ((e.altKey && (e.key === "i" || e.key === "I")) || (e.altKey && e.code === "KeyI")) {
+        e.preventDefault();
+        applyInvert(!isInverted, true);
+      }
+    });
+
+    // Inicjalizacja startowa
+    setCardMode(currentCardMode, false);
+    goToHubStep(1);
+    renderCurrentCard();
+    renderCatalog();
+    renderStats();
+    renderHomeDashboard();
+    switchTab("panel-home");
+
+    // ==========================================================================
+    // PROGRESSIVE WEB APP (PWA) & SERVICE WORKER
+    // Działa w 100% na statycznym GitHub Pages (HTTPS + pliki statyczne)
+    // ==========================================================================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          console.log('[PWA] Service Worker zarejestrowany pomyślnie. Zakres:', reg.scope);
+        }).catch((err) => {
+          console.warn('[PWA] Rejestracja Service Workera nie powiodła się:', err);
+        });
+      });
+    }
+
+    let deferredPrompt = null;
+    const btnInstallPwa = document.getElementById("btn-install-pwa");
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (btnInstallPwa) {
+        btnInstallPwa.style.display = "inline-flex";
+      }
+    });
+
+    if (btnInstallPwa) {
+      btnInstallPwa.addEventListener("click", async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          if (choice.outcome === "accepted") {
+            announce("Aplikacja WCAG została pomyślnie zainstalowana!");
+          }
+          deferredPrompt = null;
+          btnInstallPwa.style.display = "none";
+        } else {
+          alert("Instalacja PWA:\n\n• Safari / iOS: Kliknij ikonę Udostępnij (kwadrat ze strzałką) i wybierz 'Do ekranu początkowego'.\n• Chrome / Edge na komputerze: Kliknij ikonę instalacji w prawej części paska adresu przeglądarki.");
+        }
+      });
+    }
+
+    window.addEventListener("appinstalled", () => {
+      if (btnInstallPwa) btnInstallPwa.style.display = "none";
+      deferredPrompt = null;
+      announce("Zainstalowano jako aplikację.");
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#121215" />
+      <stop offset="100%" stop-color="#09090b" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1c21" />
+      <stop offset="100%" stop-color="#131317" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background square for maskable/app icon -->
+  <rect width="512" height="512" rx="108" fill="url(#bgGrad)" />
+  <rect width="508" height="508" x="2" y="2" rx="106" fill="none" stroke="#27272a" stroke-width="4" />
+
+  <!-- Outer Card Representation -->
+  <g transform="translate(96, 80)">
+    <!-- Back stacked card preview -->
+    <rect x="20" y="-14" width="280" height="340" rx="20" fill="#18181c" stroke="#27272a" stroke-width="2" transform="rotate(4, 160, 160)" opacity="0.6"/>
+    
+    <!-- Main Card Body -->
+    <rect x="0" y="0" width="320" height="352" rx="22" fill="url(#cardGrad)" stroke="#3f3f46" stroke-width="3"/>
+    
+    <!-- Top Header Bar inside Card -->
+    <rect x="28" y="28" width="80" height="24" rx="6" fill="#27272a"/>
+    <text x="68" y="44" fill="#a1a1aa" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="1">WCAG</text>
+
+    <rect x="220" y="28" width="72" height="24" rx="6" fill="#27272a"/>
+    <text x="256" y="44" fill="#fafafa" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace" font-size="12" font-weight="700" text-anchor="middle" letter-spacing="0.5">2.1 · 2.2</text>
+
+    <!-- Center Icon: Accessibility Focus Eye & Contrast Ring -->
+    <g transform="translate(160, 150)">
+      <!-- Contrast Ring -->
+      <circle cx="0" cy="0" r="46" fill="none" stroke="#fafafa" stroke-width="4"/>
+      <path d="M 0 -46 A 46 46 0 0 1 0 46 Z" fill="#fafafa"/>
+      
+      <!-- Subtle Crosshair / Focus brackets -->
+      <path d="M -58 -20 L -58 -38 L -40 -38" fill="none" stroke="#a1a1aa" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 58 -20 L 58 -38 L 40 -38" fill="none" stroke="#a1a1aa" stroke-width="3" stroke-linecap="round"/>
+      <path d="M -58 20 L -58 38 L -40 38" fill="none" stroke="#a1a1aa" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 58 20 L 58 38 L 40 38" fill="none" stroke="#a1a1aa" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Bottom Text: A11Y Tag -->
+    <text x="160" y="260" fill="#fafafa" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="800" text-anchor="middle" letter-spacing="-0.5">FISZKI</text>
+    <text x="160" y="288" fill="#a1a1aa" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="600" text-anchor="middle" letter-spacing="2">A11Y MASTERY</text>
+
+    <!-- Card bottom indicator dots -->
+    <circle cx="140" cy="324" r="3" fill="#3f3f46"/>
+    <circle cx="160" cy="324" r="4" fill="#fafafa"/>
+    <circle cx="180" cy="324" r="3" fill="#3f3f46"/>
+  </g>
+</svg>
